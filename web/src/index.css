@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 9% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 9% 8%;
+    --primary: 0 100% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 220 9% 23%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 220 9% 8%;
+    --destructive: 0 70% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 0 100% 40%;
+    --radius: 0;
+    color-scheme: light only;
+  }
+}
+
+@layer base {
+  *, *::before, *::after {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+  body {
+    background-color: #f8f9fb;
+    color: #111827;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.5;
+    color-scheme: light only;
+  }
+  input, select, textarea {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    color-scheme: light only;
+  }
+}
+
+/* Montserrat font-weight hierarchy */
+.font-black      { font-weight: 800 !important; }
+.font-extrabold  { font-weight: 700 !important; }
+.font-bold       { font-weight: 700 !important; }
+.font-semibold   { font-weight: 600 !important; }
+.font-medium     { font-weight: 500 !important; }
+.font-normal     { font-weight: 400 !important; }
+.font-light      { font-weight: 300 !important; }

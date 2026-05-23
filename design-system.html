@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Film — Design System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;700;800&family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+    <style>
+        /* ---- Reset base ---- */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 400;
+            font-size: 16px;
+            background: #f0f0f0;
+            color: #151313;
+            line-height: 1.5;
+        }
+
+        /* ---- Layout ---- */
+        .ds-header {
+            background: #151313;
+            color: #fff;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .ds-header::after {
+            content: 'WF';
+            position: absolute;
+            right: -20px;
+            top: -20px;
+            font-size: 200px;
+            font-weight: 800;
+            color: rgba(255,255,255,0.04);
+            line-height: 1;
+            pointer-events: none;
+        }
+        .ds-header h1 { font-size: 36px; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; }
+        .ds-header p { color: #808080; margin-top: 8px; font-size: 14px; letter-spacing: 1px; }
+        .ds-header .badge {
+            display: inline-block;
+            background: #cc0000;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 4px 10px;
+            text-transform: uppercase;
+            margin-top: 16px;
+        }
+
+        .ds-nav {
+            background: #000;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+        }
+        .ds-nav a {
+            display: block;
+            color: #808080;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 18px 20px;
+            white-space: nowrap;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .ds-nav a:hover { color: #fff; border-bottom-color: #cc0000; }
+
+        .ds-main { max-width: 1200px; margin: 0 auto; padding: 40px; }
+
+        .ds-section {
+            background: #fff;
+            border-radius: 4px;
+            margin-bottom: 40px;
+            overflow: hidden;
+        }
+        .ds-section-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+        }
+        .ds-section-header h2 {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #151313;
+        }
+        .ds-section-header span {
+            font-size: 12px;
+            color: #808080;
+            font-weight: 400;
+        }
+        .ds-section-body { padding: 32px; }
+
+        /* ---- Token display helpers ---- */
+        .token-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+        }
+        .color-swatch {
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+        .color-swatch-preview {
+            height: 80px;
+        }
+        .color-swatch-info {
+            padding: 10px 12px;
+            background: #fff;
+        }
+        .color-swatch-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #151313;
+            display: block;
+        }
+        .color-swatch-hex {
+            font-size: 11px;
+            color: #808080;
+            font-family: 'Courier New', monospace;
+            margin-top: 2px;
+            display: block;
+        }
+        .color-swatch-usage {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* ---- Type specimens ---- */
+        .type-row {
+            display: flex;
+            align-items: baseline;
+            gap: 24px;
+            padding: 20px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .type-row:last-child { border-bottom: none; }
+        .type-meta {
+            width: 200px;
+            flex-shrink: 0;
+        }
+        .type-meta-name { font-size: 11px; font-weight: 700; color: #151313; text-transform: uppercase; letter-spacing: 1px; }
+        .type-meta-detail { font-size: 11px; color: #808080; margin-top: 2px; font-family: 'Courier New', monospace; }
+        .type-specimen { flex: 1; }
+
+        /* ---- Component specimens ---- */
+        .component-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 24px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .component-row:last-child { border-bottom: none; }
+        .component-label {
+            width: 100%;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #808080;
+            margin-bottom: 8px;
+        }
+        .component-preview {
+            flex: 1;
+            min-width: 280px;
+        }
+        .component-code {
+            flex: 1;
+            min-width: 280px;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #606060;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        /* ---- Dark canvas ---- */
+        .canvas-dark {
+            background: #151313;
+            padding: 32px;
+            border-radius: 4px;
+        }
+        .canvas-black {
+            background: #000;
+            padding: 32px;
+            border-radius: 4px;
+        }
+        .canvas-light {
+            background: #f9f9f9;
+            padding: 32px;
+            border-radius: 4px;
+        }
+
+        /* ===============================
+           FAITHFULLY REPRODUCED COMPONENTS
+           =============================== */
+
+        /* --- Buttons --- */
+        .formBotao {
+            display: block;
+            width: 100%;
+            line-height: 50px;
+            height: 50px;
+            border: 1px solid #bfd72f;
+            background-color: transparent;
+            font-weight: 600;
+            color: #bfd72f;
+            text-transform: uppercase;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .formBotao:hover { background-color: #bfd72f; color: #fff; }
+        .formBotao.padrao { border-color: #000; color: #000; }
+        .formBotao.padrao:hover { background-color: #000; color: #fff; }
+        .formBotao.erro-state { border-color: #B61818; color: #B61818; }
+        .formBotao.erro-state:hover { background-color: #B61818; color: #fff; }
+        .formBotao-disabled { opacity: 0.4; border-color: red; color: red; cursor: not-allowed; }
+        .simularBotao {
+            display: inline-block;
+            background-color: #000;
+            border: 2px solid #000;
+            color: #fff;
+            padding: 0 30px;
+            line-height: 66px;
+            font-size: 20px;
+            font-weight: 700;
+            border-radius: 35px;
+            text-transform: uppercase;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .simularBotao:hover { background: #fff; color: #000; }
+
+        /* --- Popup button --- */
+        .popup-btn {
+            display: inline-block;
+            padding: 12px 18px;
+            background-color: #f00;
+            color: #000;
+            font-weight: 700;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            font-family: 'Montserrat', sans-serif;
+            transition: background 0.3s;
+        }
+        .popup-btn:hover { background-color: #000; color: #fff; }
+
+        /* --- Section headings --- */
+        .ds-titulo {
+            width: 100%;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+            font-weight: 800;
+            font-size: 16px;
+            color: #cccccc;
+            text-transform: uppercase;
+            text-align: center;
+        }
+        .ds-subtitulo {
+            display: table;
+            margin: 0 auto 50px;
+            padding-bottom: 20px;
+            letter-spacing: 5px;
+            font-size: 36px;
+            color: #151313;
+            text-align: center;
+            text-transform: uppercase;
+            border-bottom: 1px solid #151313;
+            position: relative;
+        }
+        .ds-subtitulo::after {
+            content: '◆';
+            position: absolute;
+            bottom: -7px;
+            left: 0;
+            right: 0;
+            line-height: 12px;
+            font-size: 18px;
+            text-align: right;
+            width: 15px;
+            padding: 0 20px;
+            background-color: #fff;
+            margin: auto;
+        }
+        .ds-subtitulo-dark {
+            color: #fff;
+            border-bottom-color: #fff;
+        }
+        .ds-subtitulo-dark::after {
+            background-color: #151313;
+            color: #fff;
+        }
+        .ds-subtitulo-gray::after { background-color: #f9f9f9; }
+
+        /* --- Form fields --- */
+        .campo {
+            width: 100%;
+            position: relative;
+            background-color: #fff;
+            margin: 10px 0;
+            min-height: 50px;
+            border: 1px solid #151313;
+        }
+        .campo .formInput-field {
+            position: relative;
+            z-index: 2;
+            background-color: transparent;
+            width: 100%;
+            margin: 0;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 48px;
+            height: 48px;
+            color: #606060;
+            padding: 0 10px;
+            border: none;
+            outline: none;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .campo label {
+            position: absolute;
+            z-index: 1;
+            top: 14px;
+            left: 10px;
+            margin: 0;
+            font-weight: 400;
+            font-size: 16px;
+            color: #151313;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            pointer-events: none;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .campo .formInput-field:focus + label,
+        .campo .formInput-field:not(:placeholder-shown) + label {
+            top: 4px;
+            font-size: 12px;
+            color: #808080;
+        }
+        .campo .formInput-field:focus,
+        .campo .formInput-field:not(:placeholder-shown) {
+            margin-top: 20px;
+            line-height: 26px;
+            height: 26px;
+        }
+        .campo-textarea {
+            min-height: 100px;
+        }
+
+        /* --- Alerts --- */
+        .alerta {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #FFFDE4;
+            border: 1px solid #edd14e;
+            font-size: 14px;
+        }
+        .alerta.erro { background-color: #FFE4E4; border-color: #ED4E4E; color: #BD1818; }
+        .alerta.sucesso { background-color: #F6FFE4; border-color: #c2ed4e; color: #6a8900; }
+
+        /* --- Navigation replica --- */
+        .nav-replica {
+            background: #151313;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 4px;
+        }
+        .nav-replica .logo-placeholder {
+            width: 120px;
+            height: 36px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #808080;
+            letter-spacing: 1px;
+        }
+        .nav-replica .menu-items {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+        .nav-replica .menu-items a {
+            font-size: 13px;
+            color: #cccccc;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 400;
+            transition: color 0.2s;
+        }
+        .nav-replica .menu-items a:hover { color: #fff; }
+        .nav-replica .menu-items a.ativo { color: #fff; border-bottom: 1px solid #fff; }
+
+        /* --- Product card replica --- */
+        .product-card {
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+        .product-card img { width: 100%; height: auto; opacity: 0.4; display: block; transition: opacity 0.3s; }
+        .product-card:hover img { opacity: 0.9; }
+        .product-card-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 22px;
+            font-weight: 700;
+            border-bottom: 1px solid #fff;
+            white-space: nowrap;
+            padding-bottom: 4px;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        /* --- Atalho blocks --- */
+        .atalho-block {
+            padding: 60px 40px;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+            transition: opacity 0.2s;
+        }
+        .atalho-block:hover { opacity: 0.85; }
+
+        /* --- Footer replica --- */
+        .footer-replica {
+            background: #000;
+            padding: 60px 40px;
+            border-radius: 4px;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        .footer-col-title {
+            font-weight: 200;
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .footer-link {
+            display: block;
+            font-weight: 200;
+            font-size: 13px;
+            color: #808080;
+            text-decoration: none;
+            margin-bottom: 8px;
+            line-height: 20px;
+            transition: color 0.2s;
+        }
+        .footer-link:hover { color: #fff; }
+        .footer-copy {
+            border-top: 1px solid #1a1a1a;
+            padding-top: 30px;
+            font-size: 13px;
+            color: #606060;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* --- Modal replica --- */
+        .modal-replica {
+            background: #fff;
+            border-radius: 8px;
+            padding: 30px 20px;
+            max-width: 480px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .modal-title {
+            font-size: 1.4rem;
+            line-height: 1.4;
+            color: #000;
+            font-weight: 400;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            font-size: 36px;
+            cursor: pointer;
+            line-height: 1;
+            color: #333;
+        }
+
+        /* --- Shimmer card for spacing demo --- */
+        .spacing-demo {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .spacing-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .spacing-box {
+            background: #cc0000;
+            opacity: 0.7;
+        }
+        .spacing-label {
+            font-size: 11px;
+            color: #808080;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* --- Breakpoint table --- */
+        .bp-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .bp-table th {
+            text-align: left;
+            padding: 10px 16px;
+            background: #f9f9f9;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #606060;
+            border-bottom: 1px solid #eee;
+        }
+        .bp-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: top;
+        }
+        .bp-table td:first-child { font-family: 'Courier New', monospace; color: #cc0000; font-size: 13px; }
+        .bp-table tr:last-child td { border-bottom: none; }
+
+        /* --- Grid demo --- */
+        .grid-demo {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 8px;
+        }
+        .grid-col {
+            background: rgba(204, 0, 0, 0.1);
+            border: 1px solid rgba(204, 0, 0, 0.25);
+            height: 40px;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #808080;
+        }
+        .grid-example { display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; margin-top: 16px; }
+        .grid-span-6 { grid-column: span 6; background: rgba(204, 0, 0, 0.15); border-radius: 2px; padding: 8px; font-size: 11px; text-align: center; color: #606060; }
+        .grid-span-4 { grid-column: span 4; background: rgba(204, 0, 0, 0.1); border-radius: 2px; padding: 8px; font-size: 11px; text-align: center; color: #606060; }
+        .grid-span-3 { grid-column: span 3; background: rgba(204, 0, 0, 0.07); border-radius: 2px; padding: 8px; font-size: 11px; text-align: center; color: #606060; }
+
+        /* --- Pagination --- */
+        .paginacao-demo { display: flex; gap: 4px; }
+        .pag-item { min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
+        .pag-item.ativo { background: #00bfff; color: #fff; font-weight: 700; }
+        .pag-item:not(.ativo) { color: #606060; }
+        .pag-item:hover:not(.ativo) { text-decoration: underline; }
+
+        /* --- Sub-menu replica --- */
+        .submenu-demo {
+            background: #f9f9f9;
+            display: inline-block;
+            padding: 10px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+        }
+        .submenu-demo a {
+            display: block;
+            color: #808080;
+            font-size: 15px;
+            padding: 0 10px;
+            line-height: 40px;
+            text-decoration: none;
+            text-transform: none;
+            transition: all 0.2s;
+        }
+        .submenu-demo a:hover { color: #fff; background: #333; }
+
+        /* ---- Divider ---- */
+        .ds-divider { border: none; border-top: 1px solid #eee; margin: 24px 0; }
+
+        /* ---- Tag ---- */
+        .ds-tag {
+            display: inline-block;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            color: #606060;
+            border-radius: 2px;
+        }
+
+        /* ---- Section anchor offset ---- */
+        [id] { scroll-margin-top: 56px; }
+    </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="ds-header">
+    <h1>World Film</h1>
+    <p>Design System · v1.0 · 2025</p>
+    <span class="badge">Películas Automotivas &amp; Arquitetura</span>
+</div>
+
+<!-- ===== STICKY NAV ===== -->
+<nav class="ds-nav">
+    <a href="#colors">Cores</a>
+    <a href="#typography">Tipografia</a>
+    <a href="#spacing">Espaçamento</a>
+    <a href="#layout">Layout &amp; Grid</a>
+    <a href="#breakpoints">Breakpoints</a>
+    <a href="#navigation">Navegação</a>
+    <a href="#headings">Títulos</a>
+    <a href="#buttons">Botões</a>
+    <a href="#forms">Formulários</a>
+    <a href="#alerts">Alertas</a>
+    <a href="#blocks">Blocos</a>
+    <a href="#footer">Rodapé</a>
+    <a href="#modal">Modal</a>
+    <a href="#pagination">Paginação</a>
+</nav>
+
+<!-- ===== MAIN ===== -->
+<main class="ds-main">
+
+
+    <!-- ===== COLORS ===== -->
+    <section class="ds-section" id="colors">
+        <div class="ds-section-header">
+            <h2>Cores</h2>
+            <span>Paleta de tokens de cor do site</span>
+        </div>
+        <div class="ds-section-body">
+
+            <p class="component-label">Escala primária</p>
+            <div class="token-grid" style="margin-bottom: 32px;">
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#151313;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Black Deep</span>
+                        <span class="color-swatch-hex">#151313</span>
+                        <span class="color-swatch-usage">Fundo escuro, bordas, texto principal</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#000000;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Black Pure</span>
+                        <span class="color-swatch-hex">#000000</span>
+                        <span class="color-swatch-usage">Fundo do footer, botão simular</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#ffffff; border:1px solid #eee;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">White</span>
+                        <span class="color-swatch-hex">#ffffff</span>
+                        <span class="color-swatch-usage">Fundo seções, campos, modais</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#cc0000;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Accent Red ★</span>
+                        <span class="color-swatch-hex">#cc0000</span>
+                        <span class="color-swatch-usage">Cor de acento principal — destaques, badges, hover da nav, ações de garantia</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#ff0000;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Red Vivid</span>
+                        <span class="color-swatch-hex">#ff0000</span>
+                        <span class="color-swatch-usage">Variante clara do acento — popup de garantia</span>
+                    </div>
+                </div>
+                <div class="color-swatch" style="border: 2px dashed #bfd72f;">
+                    <div class="color-swatch-preview" style="background:#bfd72f;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Green CTA</span>
+                        <span class="color-swatch-hex">#bfd72f</span>
+                        <span class="color-swatch-usage">⚠ Uso restrito — somente botão Enviar (.formBotao) e setas do carrossel</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="component-label">Escala de cinzas</p>
+            <div class="token-grid" style="margin-bottom: 32px;">
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#f9f9f9; border:1px solid #eee;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Gray 50</span>
+                        <span class="color-swatch-hex">#f9f9f9</span>
+                        <span class="color-swatch-usage">Fundo padrão do site, blocoCinzaClaro</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#eeeeee;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Gray 200</span>
+                        <span class="color-swatch-hex">#eeeeee</span>
+                        <span class="color-swatch-usage">Cabeçalho de tabelas, divisores</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#cccccc;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Gray 400</span>
+                        <span class="color-swatch-hex">#cccccc</span>
+                        <span class="color-swatch-usage">Ícones do menu, título de seção (.titulo)</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#808080;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Gray 600</span>
+                        <span class="color-swatch-hex">#808080</span>
+                        <span class="color-swatch-usage">Texto corrido, links do rodapé</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#606060;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Gray 700</span>
+                        <span class="color-swatch-hex">#606060</span>
+                        <span class="color-swatch-usage">Texto dos inputs, copyright</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#333333;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Gray 800</span>
+                        <span class="color-swatch-hex">#333333</span>
+                        <span class="color-swatch-usage">Hover do sub-menu</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="component-label" style="margin-top:32px; padding-top:32px; border-top:2px solid #0A0A0A;">Esquema semântico — App Web</p>
+            <p style="font-size:12px; color:#808080; margin-bottom:20px;">Mapeamento de uso das cores no painel admin e app do vendedor. Complementa a paleta de marca acima.</p>
+            <div class="token-grid" style="margin-bottom:32px;">
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#ffffff; border:1px solid #eee;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">App Background</span>
+                        <span class="color-swatch-hex">#ffffff</span>
+                        <span class="color-swatch-usage">Fundo geral · main · cards · modais · inputs</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#0A0A0A;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">App Chrome</span>
+                        <span class="color-swatch-hex">#0A0A0A</span>
+                        <span class="color-swatch-usage">Header · sidebar · footer · bottom nav · bordas de input</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#1A1A1A;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">App Chrome Surface</span>
+                        <span class="color-swatch-hex">#1A1A1A</span>
+                        <span class="color-swatch-usage">Bordas internas do chrome · hover de nav item</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#cc0000;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">App Red ★</span>
+                        <span class="color-swatch-hex">#cc0000</span>
+                        <span class="color-swatch-usage">Botões primários · CTAs · foco de input · nav ativa · badges de erro · tabs ativas · paginação ativa · links de ação</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#f7f7f7; border:1px solid #eee;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Surface</span>
+                        <span class="color-swatch-hex">#f7f7f7</span>
+                        <span class="color-swatch-usage">Background de inputs · cabeçalho de tabela · card hover · linhas ímpares</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#e8e8e8; border:1px solid #eee;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Border</span>
+                        <span class="color-swatch-hex">#e8e8e8</span>
+                        <span class="color-swatch-usage">Bordas de cards · divisores de seção · linhas de tabela</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="component-label">Mapa semântico de uso</p>
+            <table class="bp-table" style="margin-bottom:32px;">
+                <thead>
+                    <tr>
+                        <th>Elemento</th>
+                        <th>Background</th>
+                        <th>Texto / Ícone</th>
+                        <th>Borda</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Body / Main</td><td>#ffffff</td><td>#0a0a0a</td><td>—</td></tr>
+                    <tr style="background:#f9f9f9;"><td>Header · Sidebar · Footer</td><td>#0A0A0A</td><td>#ffffff</td><td>1px #1A1A1A</td></tr>
+                    <tr><td>Nav item ativo</td><td>rgba(204,0,0,0.1)</td><td style="color:#cc0000;">#cc0000</td><td>2px #cc0000 (esq.)</td></tr>
+                    <tr style="background:#f9f9f9;"><td>Cards e painéis</td><td>#ffffff</td><td>#0a0a0a</td><td>1px #e8e8e8</td></tr>
+                    <tr><td>Input · Select · Textarea</td><td>#f7f7f7</td><td>#0a0a0a</td><td>1px #0A0A0A · foco <span style="color:#cc0000;">#cc0000</span></td></tr>
+                    <tr style="background:#f9f9f9;"><td>Botão primário / CTA</td><td style="background:#cc0000; color:#fff; padding:2px 6px; display:inline-block;">#cc0000</td><td>#ffffff</td><td>—</td></tr>
+                    <tr><td>Badge erro / bloqueado</td><td>rgba(204,0,0,0.1)</td><td style="color:#cc0000;">#cc0000</td><td>rgba(204,0,0,0.25)</td></tr>
+                    <tr style="background:#f9f9f9;"><td>Badge aprovado / sucesso</td><td>rgba(34,197,94,0.1)</td><td style="color:#16a34a;">#16a34a</td><td>rgba(34,197,94,0.25)</td></tr>
+                    <tr><td>Badge pendente / aviso</td><td>rgba(234,179,8,0.1)</td><td style="color:#ca8a04;">#ca8a04</td><td>rgba(234,179,8,0.25)</td></tr>
+                    <tr style="background:#f9f9f9;"><td>Modal header</td><td>#0A0A0A</td><td>#ffffff</td><td>—</td></tr>
+                    <tr><td>Tab ativa · Paginação ativa</td><td>#cc0000 (paginação)</td><td style="color:#cc0000;">#cc0000 (tab)</td><td>2px #cc0000 (tab)</td></tr>
+                </tbody>
+            </table>
+
+            <p class="component-label">Estados &amp; Feedback</p>
+            <div class="token-grid">
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#B61818;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Error Dark</span>
+                        <span class="color-swatch-hex">#B61818</span>
+                        <span class="color-swatch-usage">Botão de erro, borda de input inválido</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#e72c2d;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Error Light</span>
+                        <span class="color-swatch-hex">#e72c2d</span>
+                        <span class="color-swatch-usage">Ícone de fechar modal</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#9EB618;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Success</span>
+                        <span class="color-swatch-hex">#9EB618</span>
+                        <span class="color-swatch-usage">Botão de sucesso no envio de formulário</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#00bfff;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Info / Pagination</span>
+                        <span class="color-swatch-hex">#00bfff</span>
+                        <span class="color-swatch-usage">Item ativo na paginação</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#edd14e;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Warning Border</span>
+                        <span class="color-swatch-hex">#edd14e</span>
+                        <span class="color-swatch-usage">Borda do alerta padrão</span>
+                    </div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-swatch-preview" style="background:#5cb85c;"></div>
+                    <div class="color-swatch-info">
+                        <span class="color-swatch-name">Table Action</span>
+                        <span class="color-swatch-hex">#5cb85c</span>
+                        <span class="color-swatch-usage">Botão de ação em tabelas</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ===== TYPOGRAPHY ===== -->
+    <section class="ds-section" id="typography">
+        <div class="ds-section-header">
+            <h2>Tipografia</h2>
+            <span>Montserrat (primária) · peso base 300 no app · Open Sans (corpo, site institucional)</span>
+        </div>
+        <div class="ds-section-body">
+
+            <div style="background:#f7f7f7; border-left:3px solid #0A0A0A; padding:12px 16px; margin-bottom:24px; font-size:12px; color:#606060; line-height:1.7;">
+                <strong style="color:#0a0a0a;">App Web / Mobile:</strong> usar <strong>Montserrat 300 (light)</strong> como peso base em todos os elementos. Nenhum elemento usa font-weight ≥ 600 (semibold, bold, black). O site institucional worldfilm.com.br mantém os pesos originais abaixo.
+            </div>
+
+            <div class="type-row">
+                <div class="type-meta">
+                    <div class="type-meta-name">Display / Subtítulo</div>
+                    <div class="type-meta-detail">Montserrat 400<br>36px / letter-spacing 5px<br>UPPERCASE</div>
+                </div>
+                <div class="type-specimen">
+                    <span style="font-family:'Montserrat',sans-serif; font-weight:400; font-size:36px; letter-spacing:5px; text-transform:uppercase; color:#151313;">Películas</span>
+                </div>
+            </div>
+
+            <div class="type-row">
+                <div class="type-meta">
+                    <div class="type-meta-name">Section Label / Título</div>
+                    <div class="type-meta-detail">Montserrat 800<br>16px / letter-spacing 2px<br>UPPERCASE — cor #ccc</div>
+                </div>
+                <div class="type-specimen">
+                    <span style="font-family:'Montserrat',sans-serif; font-weight:800; font-size:16px; letter-spacing:2px; text-transform:uppercase; color:#cccccc;">World Film</span>
+                </div>
+            </div>
+
+            <div class="type-row">
+                <div class="type-meta">
+                    <div class="type-meta-name">Body / Texto Corrido</div>
+                    <div class="type-meta-detail">Open Sans 300<br>16px / line-height 24px<br>cor #808080</div>
+                </div>
+                <div class="type-specimen">
+                    <p style="font-family:'Open Sans',sans-serif; font-weight:300; font-size:16px; line-height:24px; color:#808080;">Presente no mercado brasileiro desde 1999, a WORLD FILM é parte de um sólido grupo comercial genuinamente brasileiro, fornecendo excelência em películas de controle solar.</p>
+                </div>
+            </div>
+
+            <div class="type-row">
+                <div class="type-meta">
+                    <div class="type-meta-name">Navigation</div>
+                    <div class="type-meta-detail">Montserrat 400<br>14px / line-height 40px<br>UPPERCASE — cor #ccc</div>
+                </div>
+                <div class="type-specimen">
+                    <span style="font-family:'Montserrat',sans-serif; font-size:14px; text-transform:uppercase; color:#cccccc; letter-spacing:0.5px;">Home &nbsp;·&nbsp; Quem Somos &nbsp;·&nbsp; Produtos &nbsp;·&nbsp; Garantia</span>
+                </div>
+            </div>
+
+            <div class="type-row">
+                <div class="type-meta">
+                    <div class="type-meta-name">Sub-menu / Rodapé</div>
+                    <div class="type-meta-detail">Montserrat 200<br>14px / line-height 20px<br>cor #808080</div>
+                </div>
+                <div class="type-specimen">
+                    <span style="font-family:'Montserrat',sans-serif; font-weight:200; font-size:14px; color:#808080;">Película Automotiva &nbsp; Película de Segurança &nbsp; Película de Arquitetura</span>
+                </div>
+            </div>
+
+            <div class="type-row">
+                <div class="type-meta">
+                    <div class="type-meta-name">Label de Campo</div>
+                    <div class="type-meta-detail">Montserrat 400<br>16px → 12px (focus)<br>UPPERCASE — cor #151313</div>
+                </div>
+                <div class="type-specimen">
+                    <span style="font-family:'Montserrat',sans-serif; font-weight:400; font-size:16px; text-transform:uppercase; color:#151313;">Nome</span>
+                    <span style="font-family:'Montserrat',sans-serif; font-weight:400; font-size:12px; text-transform:uppercase; color:#808080; margin-left:24px;">→ focus/filled:</span>
+                    <span style="font-family:'Montserrat',sans-serif; font-weight:400; font-size:12px; text-transform:uppercase; color:#808080;">Nome</span>
+                </div>
+            </div>
+
+            <div class="type-row">
+                <div class="type-meta">
+                    <div class="type-meta-name">Botão Primário</div>
+                    <div class="type-meta-detail">Montserrat 600<br>14px / UPPERCASE<br>cor #bfd72f</div>
+                </div>
+                <div class="type-specimen">
+                    <span style="font-family:'Montserrat',sans-serif; font-weight:600; font-size:14px; text-transform:uppercase; color:#bfd72f; letter-spacing:1px;">Enviar</span>
+                </div>
+            </div>
+
+            <div class="type-row">
+                <div class="type-meta">
+                    <div class="type-meta-name">Título do Produto</div>
+                    <div class="type-meta-detail">Montserrat 700<br>26px / UPPERCASE<br>cor #fff — sobre fundo escuro</div>
+                </div>
+                <div class="type-specimen" style="background:#000; padding:12px 16px; display:inline-block; border-radius:2px;">
+                    <span style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:26px; text-transform:uppercase; color:#fff; border-bottom:1px solid #fff; padding-bottom:2px;">Automotiva</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ===== SPACING ===== -->
+    <section class="ds-section" id="spacing">
+        <div class="ds-section-header">
+            <h2>Espaçamento</h2>
+            <span>Escala de espaços usados no sistema</span>
+        </div>
+        <div class="ds-section-body">
+            <div class="spacing-demo">
+                <div class="spacing-item"><div class="spacing-box" style="width:8px;height:8px;"></div><span class="spacing-label">8px</span></div>
+                <div class="spacing-item"><div class="spacing-box" style="width:10px;height:10px;"></div><span class="spacing-label">10px</span></div>
+                <div class="spacing-item"><div class="spacing-box" style="width:15px;height:15px;"></div><span class="spacing-label">15px</span></div>
+                <div class="spacing-item"><div class="spacing-box" style="width:20px;height:20px;"></div><span class="spacing-label">20px</span></div>
+                <div class="spacing-item"><div class="spacing-box" style="width:25px;height:25px;"></div><span class="spacing-label">25px</span></div>
+                <div class="spacing-item"><div class="spacing-box" style="width:30px;height:30px;"></div><span class="spacing-label">30px</span></div>
+                <div class="spacing-item"><div class="spacing-box" style="width:40px;height:40px;"></div><span class="spacing-label">40px</span></div>
+                <div class="spacing-item"><div class="spacing-box" style="width:50px;height:50px;"></div><span class="spacing-label">50px</span></div>
+                <div class="spacing-item"><div class="spacing-box" style="width:60px;height:60px;"></div><span class="spacing-label">60px</span></div>
+                <div class="spacing-item"><div class="spacing-box" style="width:100px;height:100px;"></div><span class="spacing-label">100px — bloco</span></div>
+            </div>
+
+            <hr class="ds-divider">
+
+            <p class="component-label">Tokens nomeados</p>
+            <table class="bp-table">
+                <thead>
+                    <tr>
+                        <th>Token</th>
+                        <th>Valor</th>
+                        <th>Uso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>--space-bloco</td><td>100px</td><td>Padding vertical das seções <span class="ds-tag">.bloco</span></td></tr>
+                    <tr><td>--space-bloco-h</td><td>15px</td><td>Padding horizontal em viewports &lt;1024px</td></tr>
+                    <tr><td>--space-col-gutter</td><td>15px</td><td>Gutter interno das colunas do grid de formulário</td></tr>
+                    <tr><td>--space-subtitulo-mb</td><td>50px</td><td>Margem abaixo dos subtítulos</td></tr>
+                    <tr><td>--space-titulo-mb</td><td>25px</td><td>Margem abaixo do label de seção</td></tr>
+                    <tr><td>--space-rodape-col-gap</td><td>40px</td><td>Gap entre colunas do rodapé</td></tr>
+                    <tr><td>--space-campo-mv</td><td>10px</td><td>Margem vertical dos campos de formulário</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+
+    <!-- ===== LAYOUT ===== -->
+    <section class="ds-section" id="layout">
+        <div class="ds-section-header">
+            <h2>Layout &amp; Grid</h2>
+            <span>Sistema de colunas baseado em float (12 colunas)</span>
+        </div>
+        <div class="ds-section-body">
+
+            <p class="component-label">Estrutura de página</p>
+            <table class="bp-table" style="margin-bottom:32px;">
+                <thead><tr><th>Classe</th><th>Regra</th><th>Descrição</th></tr></thead>
+                <tbody>
+                    <tr><td>.setor</td><td>width: 100%; max-width: 1920px</td><td>Container de full-bleed. Sempre engloba seções.</td></tr>
+                    <tr><td>.conteudo</td><td>width: 972px; margin: 0 auto</td><td>Coluna central de conteúdo. 100% em mobile.</td></tr>
+                    <tr><td>.bloco</td><td>padding: 100px 0</td><td>Espaçamento padrão de seção.</td></tr>
+                    <tr><td>#site</td><td>max-width: 1920px</td><td>Wrapper raiz da página.</td></tr>
+                </tbody>
+            </table>
+
+            <p class="component-label">Grid de 12 colunas — .formCol*</p>
+            <div class="grid-demo" style="margin-bottom:8px;">
+                <div class="grid-col">1</div><div class="grid-col">2</div><div class="grid-col">3</div><div class="grid-col">4</div>
+                <div class="grid-col">5</div><div class="grid-col">6</div><div class="grid-col">7</div><div class="grid-col">8</div>
+                <div class="grid-col">9</div><div class="grid-col">10</div><div class="grid-col">11</div><div class="grid-col">12</div>
+            </div>
+            <div class="grid-example">
+                <div class="grid-span-6">.formCol6 (50%)</div>
+                <div class="grid-span-6">.formCol6 (50%)</div>
+            </div>
+            <div class="grid-example" style="margin-top:8px;">
+                <div class="grid-span-4">.formCol4 (33%)</div>
+                <div class="grid-span-4">.formCol4 (33%)</div>
+                <div class="grid-span-4">.formCol4 (33%)</div>
+            </div>
+            <div class="grid-example" style="margin-top:8px;">
+                <div class="grid-span-3">.formCol3</div>
+                <div class="grid-span-3">.formCol3</div>
+                <div class="grid-span-3">.formCol3</div>
+                <div class="grid-span-3">.formCol3</div>
+            </div>
+
+            <hr class="ds-divider">
+
+            <p class="component-label">Padrão de página interna</p>
+            <div style="background:#f0f0f0; padding:16px; border-radius:4px; font-size:12px; font-family:'Courier New',monospace; color:#606060; line-height:2;">
+                &lt;div class="<strong>setor</strong>"&gt;<br>
+                &nbsp;&nbsp;&lt;header class="<strong>setor internaTopo bloco blocoCinzaEscuro</strong>"&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="<strong>conteudo</strong>"&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;h1 class="<strong>subtitulo</strong>"&gt;Título da Página&lt;/h1&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;<br>
+                &nbsp;&nbsp;&lt;/header&gt;<br>
+                &nbsp;&nbsp;&lt;section class="<strong>setor internaConteudo bloco blocoBranco</strong>"&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&lt;header class="<strong>conteudo</strong>"&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;h2 class="<strong>titulo</strong>"&gt;Label de Seção&lt;/h2&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;p class="<strong>subtitulo</strong>"&gt;Subtítulo&lt;/p&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&lt;/header&gt;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&lt;div class="<strong>conteudo textoCorrido</strong>"&gt; … &lt;/div&gt;<br>
+                &nbsp;&nbsp;&lt;/section&gt;<br>
+                &lt;/div&gt;
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ===== BREAKPOINTS ===== -->
+    <section class="ds-section" id="breakpoints">
+        <div class="ds-section-header">
+            <h2>Breakpoints</h2>
+            <span>Pontos de quebra do layout responsivo</span>
+        </div>
+        <div class="ds-section-body">
+            <table class="bp-table">
+                <thead>
+                    <tr>
+                        <th>Breakpoint</th>
+                        <th>Mudanças principais</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>≤ 1600px</td>
+                        <td>.topoLinks fica absolute (position: absolute; top: 0; right: 0). .menuFundo margin: 0.</td>
+                    </tr>
+                    <tr>
+                        <td>≤ 1200px</td>
+                        <td>.conteudo padding 0 20px. Imagem do banner começa a ampliar (width: 140%, margin: 0 -20%).</td>
+                    </tr>
+                    <tr>
+                        <td>≤ 1024px</td>
+                        <td>.conteudo vira 100%. .bloco ganha padding lateral 15px. .atalho vira 100%. .produtoItem vira 100%. Colunas .formCol3 viram 33%.</td>
+                    </tr>
+                    <tr>
+                        <td>≤ 900px</td>
+                        <td>Banner 160% de largura. Links 2 e 3 do topo ocultam texto (só ícone). Ajustes no simulador.</td>
+                    </tr>
+                    <tr>
+                        <td>≤ 700px</td>
+                        <td>Menu hamburger. .topoLinks oculto. .menuFundo vira drawer lateral (250px, slide da direita). .subtitulo vira 6vw. Colunas .formCol3–10 viram 100%.</td>
+                    </tr>
+                    <tr>
+                        <td>≤ 600px</td>
+                        <td>Banner 200% de largura.</td>
+                    </tr>
+                    <tr>
+                        <td>≤ 480px</td>
+                        <td>Ajustes do popup: padding reduzido, botões em coluna.</td>
+                    </tr>
+                    <tr>
+                        <td>≤ 400px</td>
+                        <td>.formCol3 (grid de produtos) vira 100%.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+
+    <!-- ===== NAVIGATION ===== -->
+    <section class="ds-section" id="navigation">
+        <div class="ds-section-header">
+            <h2>Navegação</h2>
+            <span>Header fixo com transparência → fundo preto ao scroll</span>
+        </div>
+        <div class="ds-section-body">
+
+            <div class="component-row">
+                <div class="component-label">Estado padrão (topo da página — transparente)</div>
+                <div class="component-preview" style="width:100%;">
+                    <div class="nav-replica">
+                        <div class="logo-placeholder">WORLD FILM</div>
+                        <ul class="menu-items">
+                            <li><a href="#" class="ativo">Home</a></li>
+                            <li><a href="#">Quem Somos</a></li>
+                            <li><a href="#">Produtos ▾</a></li>
+                            <li><a href="#">Garantia</a></li>
+                            <li><a href="#">Catálogo</a></li>
+                            <li><a href="#">Contato</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="component-row">
+                <div class="component-label">Sub-menu (hover em "Produtos")</div>
+                <div class="component-preview">
+                    <div class="submenu-demo">
+                        <a href="#">Películas Automotivas</a>
+                        <a href="#">Películas de Segurança</a>
+                        <a href="#">Películas para Arquitetura</a>
+                        <a href="#">PPF</a>
+                        <a href="#">Fichas Técnicas</a>
+                    </div>
+                </div>
+                <div class="component-code">/* Sub-menu aparece no hover */
+.menuListaItem:hover
+  .subMenuBotao + .subMenu {
+  display: block;
+}
+
+.subMenu {
+  position: absolute;
+  right: 0; top: 100%;
+  background: #f9f9f9;
+  box-shadow: 5px 5px 15px
+    rgba(0,0,0,.2);
+}</div>
+            </div>
+
+            <div class="component-row">
+                <div class="component-label">Comportamento ao scroll — classe .altera adicionada ao body</div>
+                <div class="component-preview">
+                    <div style="font-size:13px; color:#606060; line-height:1.8;">
+                        <strong>#topo</strong> padrão: <span class="ds-tag">padding: 40px 0</span> · fundo transparente<br>
+                        <strong>#topo</strong> .altera: <span class="ds-tag">padding: 20px 0</span> · sombra animada aparece<br>
+                        <strong>.topoLogo</strong> padrão: <span class="ds-tag">width: 200px</span><br>
+                        <strong>.topoLogo</strong> .altera: <span class="ds-tag">width: 140px</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ===== HEADINGS ===== -->
+    <section class="ds-section" id="headings">
+        <div class="ds-section-header">
+            <h2>Títulos de Seção</h2>
+            <span>Padrão .titulo + .subtitulo com diamante decorativo</span>
+        </div>
+        <div class="ds-section-body">
+
+            <div class="component-row">
+                <div class="component-label">.titulo — label da seção (acima do subtítulo)</div>
+                <div class="component-preview">
+                    <p class="ds-titulo">World Film</p>
+                </div>
+                <div class="component-code">&lt;h3 class="titulo"&gt;World Film&lt;/h3&gt;
+
+/* 16px · Montserrat 800
+   UPPERCASE · #cccccc
+   letter-spacing: 2px */</div>
+            </div>
+
+            <div class="component-row">
+                <div class="component-label">.subtitulo — fundo branco</div>
+                <div class="component-preview" style="padding: 40px 20px;">
+                    <p class="ds-subtitulo">Desde 1999 no mercado</p>
+                </div>
+                <div class="component-code">&lt;p class="subtitulo"&gt;
+  Desde 1999 no mercado
+&lt;/p&gt;
+
+/* 36px · Montserrat 400
+   UPPERCASE · #151313
+   letter-spacing: 5px
+   border-bottom + ◆ */</div>
+            </div>
+
+            <div class="component-row">
+                <div class="component-label">.subtitulo em fundo .blocoCinzaClaro</div>
+                <div class="component-preview canvas-light" style="padding: 40px 20px;">
+                    <p class="ds-subtitulo ds-subtitulo-gray">Películas Automotivas</p>
+                </div>
+            </div>
+
+            <div class="component-row">
+                <div class="component-label">.subtitulo em fundo .blocoCinzaEscuro</div>
+                <div class="component-preview canvas-dark" style="padding: 40px 20px;">
+                    <p class="ds-subtitulo ds-subtitulo-dark">Contato</p>
+                </div>
+                <div class="component-code">/* Fundo escuro:
+.blocoCinzaEscuro .subtitulo {
+  color: #fff;
+  border-bottom-color: #fff;
+}
+.blocoCinzaEscuro .subtitulo::after {
+  background-color: #151313;
+  color: #fff;
+} */</div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ===== BUTTONS ===== -->
+    <section class="ds-section" id="buttons">
+        <div class="ds-section-header">
+            <h2>Botões</h2>
+            <span>Variantes e estados</span>
+        </div>
+        <div class="ds-section-body">
+
+            <div class="component-row">
+                <div class="component-label">Botão primário — .formBotao (default + hover)</div>
+                <div class="component-preview" style="max-width:300px;">
+                    <button class="formBotao">Enviar</button>
+                </div>
+                <div class="component-code">&lt;button class="formBotao"&gt;Enviar&lt;/button&gt;
+
+/* border: 1px solid #bfd72f
+   color: #bfd72f · height: 50px
+   hover → bg #bfd72f · color #fff */</div>
+            </div>
+
+            <div class="component-row">
+                <div class="component-label">Botão padrão — .formBotao.padrao</div>
+                <div class="component-preview" style="max-width:300px;">
+                    <button class="formBotao padrao">Saiba Mais</button>
+                </div>
+                <div class="component-code">&lt;button class="formBotao padrao"&gt;
+  Saiba Mais
+&lt;/button&gt;
+
+/* border/color: #000
+   hover → bg #000 · color #fff */</div>
+            </div>
+
+            <div class="component-row">
+                <div class="component-label">Botão erro — .formBotao (estado .erro)</div>
+                <div class="component-preview" style="max-width:300px;">
+                    <button class="formBotao erro-state">Erro no envio</button>
+                </div>
+            </div>
+
+            <div class="component-row">
+                <div class="component-label">Botão desabilitado</div>
+                <div class="component-preview" style="max-width:300px;">
+                    <button class="formBotao formBotao-disabled" disabled>Enviando...</button>
+                </div>
+                <div class="component-code">/* opacity: 0.4
+   border-color/color: red
+   cursor: progress */</div>
+            </div>
+
+            <div class="component-row">
+                <div class="component-label">Botão simulador — .simularBotao</div>
+                <div class="component-preview">
+                    <button class="simularBotao">Simular Película</button>
+                </div>
+                <div class="component-code">&lt;button class="simularBotao"&gt;
+  Simular Película
+&lt;/button&gt;
+
+/* bg #000 · border-radius 35px
+   font-size 20px · font-weight 700
+   hover → bg #fff · color #000 */</div>
+            </div>
+
+
+        </div>
+    </section>
+
+
+    <!-- ===== FORMS ===== -->
+    <section class="ds-section" id="forms">
+        <div class="ds-section-header">
+            <h2>Formulários</h2>
+            <span>Campo flutuante com label animado + grid de colunas</span>
+        </div>
+        <div class="ds-section-body">
+
+            <div class="component-row">
+                <div class="component-label">Campo com label flutuante — .campo</div>
+                <div class="component-preview" style="max-width:400px;">
+                    <div class="campo">
+                        <input type="text" class="formInput-field" placeholder=" " id="demo-nome"/>
+                        <label for="demo-nome">Nome</label>
+                    </div>
+                    <div class="campo">
+                        <input type="email" class="formInput-field" placeholder=" " id="demo-email"/>
+                        <label for="demo-email">E-mail</label>
+                    </div>
+                    <div class="campo">
+                        <textarea class="formInput-field campo-textarea" placeholder=" " id="demo-msg" style="min-height:80px; resize:none;"></textarea>
+                        <label for="demo-msg">Mensagem</label>
+                    </div>
+                </div>
+                <div class="component-code">&lt;div class="campo"&gt;
+  &lt;input type="text"
+    name="nome"
+    class="formInput"
+    required /&gt;
+  &lt;label&gt;Nome&lt;/label&gt;
+&lt;/div&gt;
+
+/* label sobe ao focus/valid:
+   top: 14px → 4px
+   font-size: 16px → 12px
+   input margin-top: 0 → 20px */</div>
+            </div>
+
+            <div class="component-row">
+                <div class="component-label">Layout de formulário — .formLinha + .formCol*</div>
+                <div class="component-preview" style="max-width:600px;">
+                    <div style="margin: 0 -15px; overflow:hidden;">
+                        <div style="padding:0 15px; float:left; width:100%;">
+                            <div class="campo"><input type="text" class="formInput-field" placeholder=" " id="f1"/><label for="f1">Nome Completo</label></div>
+                        </div>
+                        <div style="padding:0 15px; float:left; width:50%;">
+                            <div class="campo"><input type="text" class="formInput-field" placeholder=" " id="f2"/><label for="f2">E-mail</label></div>
+                        </div>
+                        <div style="padding:0 15px; float:left; width:50%;">
+                            <div class="campo"><input type="text" class="formInput-field" placeholder=" " id="f3"/><label for="f3">Telefone</label></div>
+                        </div>
+                        <div style="padding:0 15px; float:left; width:100%; clear:both; padding-top:8px;">
+                            <button class="formBotao">Enviar Mensagem</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ===== ALERTS ===== -->
+    <section class="ds-section" id="alerts">
+        <div class="ds-section-header">
+            <h2>Alertas</h2>
+            <span>Feedback inline de sistema</span>
+        </div>
+        <div class="ds-section-body">
+            <div class="alerta">Aviso: verifique as informações antes de continuar.</div>
+            <div class="alerta erro">Erro: não foi possível enviar o formulário. Tente novamente.</div>
+            <div class="alerta sucesso">Sucesso: sua mensagem foi enviada com sucesso!</div>
+            <div class="component-code" style="margin-top:16px;">&lt;div class="alerta"&gt;Aviso padrão&lt;/div&gt;
+&lt;div class="alerta erro"&gt;Erro&lt;/div&gt;
+&lt;div class="alerta sucesso"&gt;Sucesso&lt;/div&gt;</div>
+        </div>
+    </section>
+
+
+    <!-- ===== BLOCKS ===== -->
+    <section class="ds-section" id="blocks">
+        <div class="ds-section-header">
+            <h2>Blocos de Fundo</h2>
+            <span>Variações de cor por seção — classes .bloco*</span>
+        </div>
+        <div class="ds-section-body">
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+
+                <div style="padding:40px 32px; background:#ffffff; border:1px solid #eee; border-radius:4px;">
+                    <p class="ds-titulo" style="color:#ccc; margin-bottom:10px;">World Film</p>
+                    <p class="ds-subtitulo" style="font-size:24px; margin-bottom:0;">blocoBranco</p>
+                    <p style="font-size:11px; font-family:'Courier New',monospace; color:#808080; margin-top:12px;">#ffffff</p>
+                </div>
+
+                <div style="padding:40px 32px; background:#f9f9f9; border-radius:4px;">
+                    <p class="ds-titulo" style="color:#ccc; margin-bottom:10px;">World Film</p>
+                    <p class="ds-subtitulo ds-subtitulo-gray" style="font-size:24px; margin-bottom:0;">blocoCinzaClaro</p>
+                    <p style="font-size:11px; font-family:'Courier New',monospace; color:#808080; margin-top:12px;">#f9f9f9</p>
+                </div>
+
+                <div style="padding:40px 32px; background:#151313; border-radius:4px;">
+                    <p class="ds-titulo" style="color:#555; margin-bottom:10px;">World Film</p>
+                    <p class="ds-subtitulo ds-subtitulo-dark" style="font-size:24px; margin-bottom:0;">blocoCinzaEscuro</p>
+                    <p style="font-size:11px; font-family:'Courier New',monospace; color:#555; margin-top:12px;">#151313</p>
+                </div>
+
+                <div style="padding:40px 32px; background:#000000; border-radius:4px;">
+                    <p class="ds-titulo" style="color:#333; margin-bottom:10px;">World Film</p>
+                    <p class="ds-subtitulo ds-subtitulo-dark" style="font-size:24px; margin-bottom:0;">blocoPreto</p>
+                    <p style="font-size:11px; font-family:'Courier New',monospace; color:#444; margin-top:12px;">#000000</p>
+                </div>
+
+            </div>
+
+            <hr class="ds-divider">
+
+            <p class="component-label">Atalhos — .atalho (50% width cada)</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; border-radius:4px; overflow:hidden;">
+                <div class="atalho-block" style="background:#151313;">
+                    <p class="ds-titulo" style="font-size:13px; margin-bottom:16px; color:#555;">Simulador</p>
+                    <p style="font-size:24px; letter-spacing:4px; text-transform:uppercase; color:#fff; border-bottom:1px solid #fff; display:inline; padding-bottom:8px;">Simule todas as películas</p>
+                </div>
+                <div class="atalho-block" style="background:#f9f9f9;">
+                    <p class="ds-titulo" style="font-size:13px; margin-bottom:16px; color:#ccc;">Distribuidor</p>
+                    <p style="font-size:24px; letter-spacing:4px; text-transform:uppercase; color:#151313; border-bottom:1px solid #151313; display:inline; padding-bottom:8px;">Seja um distribuidor</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- ===== FOOTER ===== -->
+    <section class="ds-section" id="footer">
+        <div class="ds-section-header">
+            <h2>Rodapé</h2>
+            <span>4 colunas em fundo preto + barra de copyright</span>
+        </div>
+        <div class="ds-section-body">
+            <div class="footer-replica">
+                <div class="footer-grid">
+                    <div>
+                        <div class="footer-col-title">Menu</div>
+                        <a href="#" class="footer-link">Home</a>
+                        <a href="#" class="footer-link">Quem Somos</a>
+                        <a href="#" class="footer-link">Simulador</a>
+                        <a href="#" class="footer-link">Seja um Distribuidor</a>
+                        <a href="#" class="footer-link">Contato</a>
+                    </div>
+                    <div>
+                        <div class="footer-col-title">Produtos</div>
+                        <a href="#" class="footer-link">Película Automotiva</a>
+                        <a href="#" class="footer-link">Película de Segurança</a>
+                        <a href="#" class="footer-link">Película de Arquitetura</a>
+                        <a href="#" class="footer-link">Ferramentas de Aplicação</a>
+                    </div>
+                    <div>
+                        <div class="footer-col-title">Contato</div>
+                        <div style="font-size:12px; color:#555; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Telefone</div>
+                        <a href="#" class="footer-link">(11) 2173-5544</a>
+                        <div style="font-size:12px; color:#555; margin-top:16px; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">E-mail</div>
+                        <a href="#" class="footer-link">comercialweb@worldfilm.com.br</a>
+                    </div>
+                    <div>
+                        <div class="footer-col-title">Redes Sociais</div>
+                        <div style="display:flex; gap:16px;">
+                            <span style="color:#ccc; font-size:28px;">f</span>
+                            <span style="color:#ccc; font-size:28px;">ig</span>
+                            <span style="color:#ccc; font-size:28px;"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-copy">
+                    <span><strong style="color:#606060;">© 2017, WORLD FILM.</strong> Todos os direitos reservados.</span>
+                    <span>Web | Var Digital</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== MODAL ===== -->
+    <section class="ds-section" id="modal">
+        <div class="ds-section-header">
+            <h2>Modal / Popup</h2>
+            <span>Popup de certificado de garantia (aparece ao carregar a home)</span>
+        </div>
+        <div class="ds-section-body">
+            <div style="background: rgba(0,0,0,0.6); padding:40px; border-radius:4px; display:flex; justify-content:center;">
+                <div class="modal-replica">
+                    <button class="modal-close">×</button>
+                    <h2 class="modal-title">Cadastre-se para Registrar seu Certificado de Garantia</h2>
+                    <div class="modal-buttons">
+                        <button class="popup-btn">Automotivo</button>
+                        <button class="popup-btn">Arquitetura</button>
+                        <button class="popup-btn">PPF</button>
+                    </div>
+                    <div style="background:#f0f0f0; height:120px; border-radius:4px; display:flex;align-items:center;justify-content:center; color:#aaa; font-size:13px;">[ selo-certificado.gif ]</div>
+                </div>
+            </div>
+
+            <div class="component-code" style="margin-top:16px;">/* Overlay: rgba(0,0,0,0.6) · z-index 1000
+   Popup: max-width 500px · border-radius 8px
+   box-shadow: 0 4px 15px rgba(0,0,0,.3)
+   Exibido em window load, fechado em setTimeout */
+
+setTimeout(() => {
+  seloGif.src = 'images/selo-final.jpg';
+}, 1800);</div>
+        </div>
+    </section>
+
+
+    <!-- ===== PAGINATION ===== -->
+    <section class="ds-section" id="pagination">
+        <div class="ds-section-header">
+            <h2>Paginação &amp; Tabela</h2>
+            <span>Componentes de listagem e navegação de dados</span>
+        </div>
+        <div class="ds-section-body">
+
+            <p class="component-label">Paginação — .paginacao</p>
+            <div class="paginacao-demo" style="margin-bottom:32px;">
+                <div class="pag-item">‹</div>
+                <div class="pag-item">1</div>
+                <div class="pag-item ativo">2</div>
+                <div class="pag-item">3</div>
+                <div class="pag-item">4</div>
+                <div class="pag-item">›</div>
+            </div>
+
+            <p class="component-label">Tabela — .tabela</p>
+            <table style="border:1px solid #ccc; border-collapse:collapse; width:100%; font-size:14px; margin-bottom:24px;">
+                <thead>
+                    <tr style="background:#eee;">
+                        <th style="padding:10px; text-align:left; border-bottom:1px solid #ccc;">Produto</th>
+                        <th style="padding:10px; text-align:center; border-bottom:1px solid #ccc;">Categoria</th>
+                        <th style="padding:10px; text-align:center; border-bottom:1px solid #ccc;">Garantia</th>
+                        <th style="padding:10px; text-align:center; border-bottom:1px solid #ccc;">Ação</th>
+                    </tr>
+                </thead>
+                <tbody style="background:#fff;">
+                    <tr>
+                        <td style="padding:10px; border-bottom:1px solid #ccc; text-align:left;">Insuline Gold</td>
+                        <td style="padding:10px; border-bottom:1px solid #ccc; text-align:center; color:#808080;">Automotiva</td>
+                        <td style="padding:10px; border-bottom:1px solid #ccc; text-align:center; color:#808080;">5 anos</td>
+                        <td style="padding:10px; border-bottom:1px solid #ccc; text-align:center;"><button style="background:#5cb85c; color:#fff; padding:4px 12px; border:none; cursor:pointer; font-size:12px;">Ver</button></td>
+                    </tr>
+                    <tr style="background:#f9f9f9;">
+                        <td style="padding:10px; border-bottom:1px solid #ccc; text-align:left;">Safira Line</td>
+                        <td style="padding:10px; border-bottom:1px solid #ccc; text-align:center; color:#808080;">Automotiva</td>
+                        <td style="padding:10px; border-bottom:1px solid #ccc; text-align:center; color:#808080;">3 anos</td>
+                        <td style="padding:10px; border-bottom:1px solid #ccc; text-align:center;"><button style="background:#5cb85c; color:#fff; padding:4px 12px; border:none; cursor:pointer; font-size:12px;">Ver</button></td>
+                    </tr>
+                    <tr>
+                        <td style="padding:10px; text-align:left;">Reflective</td>
+                        <td style="padding:10px; text-align:center; color:#808080;">Arquitetura</td>
+                        <td style="padding:10px; text-align:center; color:#808080;">10 anos</td>
+                        <td style="padding:10px; text-align:center;"><button style="background:#5cb85c; color:#fff; padding:4px 12px; border:none; cursor:pointer; font-size:12px;">Ver</button></td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </section>
+
+
+    <!-- ===== FILE MAP ===== -->
+    <section class="ds-section">
+        <div class="ds-section-header">
+            <h2>Mapa de Arquivos</h2>
+            <span>Estrutura do projeto</span>
+        </div>
+        <div class="ds-section-body">
+            <div style="font-family:'Courier New',monospace; font-size:13px; line-height:2; color:#606060;">
+                <strong style="color:#151313;">WorldFilm/</strong><br>
+                ├── <strong>inc/</strong><br>
+                │&nbsp;&nbsp; ├── head.php &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← &lt;head&gt; comum (meta, CSS, GTM)</span><br>
+                │&nbsp;&nbsp; ├── header.php &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← #topo com navegação</span><br>
+                │&nbsp;&nbsp; ├── footer.php &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← Atalhos + &lt;footer&gt; + copyright</span><br>
+                │&nbsp;&nbsp; ├── produtos.php &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← Grid de produtos da home</span><br>
+                │&nbsp;&nbsp; ├── setas.php &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← SVG das setas do carrossel</span><br>
+                │&nbsp;&nbsp; └── menu-interno-*.php<span style="color:#aaa;">← Menu lateral de linhas de produto</span><br>
+                ├── <strong>css/</strong><br>
+                │&nbsp;&nbsp; ├── style.css &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← Fonte principal (30KB)</span><br>
+                │&nbsp;&nbsp; ├── style.min.css &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← Minificado (usado em produção)</span><br>
+                │&nbsp;&nbsp; ├── produto.css &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← Estilos de página de produto</span><br>
+                │&nbsp;&nbsp; ├── quemsomos.css &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← Estilos de quem somos</span><br>
+                │&nbsp;&nbsp; ├── template.css &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← CSS auxiliar de template</span><br>
+                │&nbsp;&nbsp; └── owl.* &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← Plugin de carrossel OWL</span><br>
+                ├── <strong>js/</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← Scripts JS</span><br>
+                ├── <strong>images/</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← Imagens do site</span><br>
+                ├── index.php &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#aaa;">← Home</span><br>
+                ├── peliculas-automotivas.php<br>
+                ├── peliculas-arquitetura.php<br>
+                ├── peliculas-seguranca.php<br>
+                ├── garantia.php / garantia-*.php<br>
+                ├── simulador-peliculas-automotivas.php<br>
+                ├── quem-somos.php<br>
+                ├── contato.php<br>
+                └── seja-um-distribuidor.php
+            </div>
+        </div>
+    </section>
+
+
+</main>
+
+<footer style="background:#000; color:#555; text-align:center; padding:30px; font-size:12px; font-family:'Montserrat',sans-serif; letter-spacing:1px;">
+    WORLD FILM · DESIGN SYSTEM · 2025 · Var Digital
+</footer>
+
+</body>
+</html>
