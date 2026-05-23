@@ -45,11 +45,11 @@ export default function VendedorCampanhaDetalhe() {
 
   if (!data) return null;
 
-  const campanha = data?.data?.[0] ?? data?.campanha;
+  const campanha = data?.data?.[0] ?? data?.campanha ?? data;
   if (!campanha) return null;
 
   const premios: any[] = campanha.premios ?? data?.premios ?? [];
-  const desempenho = data?.desempenho ?? null;
+  const desempenho = campanha?.meu_desempenho ?? data?.desempenho ?? null;
   const days = daysLeft(campanha.data_fim);
   const encerrada = campanha.status !== 'ativa';
   const urgent = !encerrada && days <= 3;
