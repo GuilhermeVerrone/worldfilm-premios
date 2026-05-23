@@ -41,14 +41,14 @@ cp .env.example .env
 
 Edite o `.env` e ajuste os valores abaixo para a sua máquina:
 
-| Variável | Descrição |
-|---|---|
-| `DATABASE_URL` | Connection string do MySQL (ex: `mysql://root:senha@localhost:3306/worldfilm_dev`) |
-| `JWT_SECRET` | String aleatória longa (mín. 64 chars) |
-| `JWT_REFRESH_SECRET` | String aleatória longa diferente da anterior |
-| `PORT` | Porta da API (padrão `3001`) |
-| `VITE_API_URL` | URL da API para o frontend (padrão `http://localhost:3001`) |
-| `FIREBASE_SERVICE_ACCOUNT_PATH` | Caminho para o JSON do Firebase Admin (opcional em dev) |
+| Variável                        | Descrição                                                                          |
+| ------------------------------- | ---------------------------------------------------------------------------------- |
+| `DATABASE_URL`                  | Connection string do MySQL (ex: `mysql://root:senha@localhost:3306/worldfilm_dev`) |
+| `JWT_SECRET`                    | String aleatória longa (mín. 64 chars)                                             |
+| `JWT_REFRESH_SECRET`            | String aleatória longa diferente da anterior                                       |
+| `PORT`                          | Porta da API (padrão `3001`)                                                       |
+| `VITE_API_URL`                  | URL da API para o frontend (padrão `http://localhost:3001`)                        |
+| `FIREBASE_SERVICE_ACCOUNT_PATH` | Caminho para o JSON do Firebase Admin (opcional em dev)                            |
 
 ### 4. Crie o banco de dados
 
