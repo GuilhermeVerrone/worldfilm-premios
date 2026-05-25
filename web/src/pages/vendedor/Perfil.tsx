@@ -50,7 +50,6 @@ export default function VendedorPerfil() {
   const [nome, setNome] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [chavePix, setChavePix] = useState('');
-
   const [senhaAtual, setSenhaAtual] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmaSenha, setConfirmaSenha] = useState('');
@@ -66,19 +65,13 @@ export default function VendedorPerfil() {
   const perfilMutation = useMutation({
     mutationFn: () =>
       api.put('/vendedor/perfil', { nome, whatsapp: whatsapp.replace(/\D/g, ''), chave_pix: chavePix }),
-    onSuccess: () => {
-      success('Perfil atualizado');
-      qc.invalidateQueries({ queryKey: ['vendedor-perfil'] });
-    },
+    onSuccess: () => { success('Perfil atualizado'); qc.invalidateQueries({ queryKey: ['vendedor-perfil'] }); },
     onError: (err: any) => toastError(err?.response?.data?.message ?? 'Erro ao salvar'),
   });
 
   const senhaMutation = useMutation({
     mutationFn: () => api.put('/vendedor/senha', { senhaAtual, novaSenha }),
-    onSuccess: () => {
-      success('Senha alterada com sucesso');
-      setSenhaAtual(''); setNovaSenha(''); setConfirmaSenha('');
-    },
+    onSuccess: () => { success('Senha alterada com sucesso'); setSenhaAtual(''); setNovaSenha(''); setConfirmaSenha(''); },
     onError: (err: any) => toastError(err?.response?.data?.message ?? 'Erro ao alterar senha'),
   });
 
@@ -96,16 +89,18 @@ export default function VendedorPerfil() {
   if (isLoading) {
     return (
       <div>
-        <div className="bg-[#0A0A0A] px-5 pt-5 pb-10">
-          <div className="flex items-center gap-4">
-            <Skeleton className="w-16 h-16 shrink-0" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-3 w-24" />
+        <div className="bg-[#111827] min-h-[160px]">
+          <div className="max-w-4xl mx-auto px-5 md:px-8 pt-5 pb-10">
+            <div className="flex items-center gap-4">
+              <Skeleton className="w-16 h-16 shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-3 w-24" />
+              </div>
             </div>
           </div>
         </div>
-        <div className="p-4 space-y-3">
+        <div className="max-w-4xl mx-auto p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           <Skeleton className="h-64" />
           <Skeleton className="h-48" />
         </div>
@@ -116,27 +111,28 @@ export default function VendedorPerfil() {
   const distribuidorNome = perfil?.distribuidor_nome ?? perfil?.distribuidor_id ?? '—';
 
   return (
-    <div className="pb-8">
+    <div>
 
       {/* ── Profile hero ── */}
-      <div className="bg-[#0A0A0A] px-5 pt-5 pb-10">
-        <div className="flex items-center gap-4">
-          {/* Avatar */}
-          <div className="w-16 h-16 bg-wf-red flex items-center justify-center shrink-0">
-            <span className="text-white font-black text-xl">{initials(perfil?.nome ?? '?')}</span>
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <p className="text-white font-black text-lg truncate">{perfil?.nome}</p>
-            <p className="text-white/40 text-xs truncate mt-0.5">{distribuidorNome}</p>
-            <div className="mt-2">
-              <Badge variant={statusToBadge(perfil?.status ?? '')}>{perfil?.status}</Badge>
+      <div className="bg-[#111827] min-h-[160px]">
+        <div className="max-w-4xl mx-auto px-5 md:px-8 pt-5 pb-10">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-wf-red flex items-center justify-center shrink-0">
+              <span className="text-white font-black text-xl">{initials(perfil?.nome ?? '?')}</span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-white font-black text-lg truncate">{perfil?.nome}</p>
+              <p className="text-white/40 text-xs truncate mt-0.5">{distribuidorNome}</p>
+              <div className="mt-2">
+                <Badge variant={statusToBadge(perfil?.status ?? '')}>{perfil?.status}</Badge>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="p-4 -mt-4 space-y-4">
+      <div className="max-w-4xl mx-auto pb-8">
+      <div className="p-4 md:p-6 lg:p-8 space-y-4 md:space-y-0 md:grid md:grid-cols-2 md:gap-6 md:items-start">
 
         {/* ── Dados pessoais ── */}
         <div className="bg-white rounded-xl shadow-sm">
@@ -145,17 +141,11 @@ export default function VendedorPerfil() {
           </div>
           <div className="p-4 space-y-3">
             <Field label="Nome" value={nome} onChange={setNome} />
-            <Field
-              label="WhatsApp"
-              value={whatsapp}
-              onChange={(v) => setWhatsapp(maskWhatsApp(v))}
-              inputMode="numeric"
-            />
+            <Field label="WhatsApp" value={whatsapp} onChange={(v) => setWhatsapp(maskWhatsApp(v))} inputMode="numeric" />
             <Field label="Chave PIX" value={chavePix} onChange={setChavePix} />
             <ReadonlyField label="CPF" value={maskCPF(perfil?.cpf ?? '')} />
             {perfil?.cnpj && <ReadonlyField label="CNPJ" value={maskCNPJ(perfil.cnpj)} />}
             <ReadonlyField label="Distribuidor" value={distribuidorNome} />
-
             <button
               onClick={() => perfilMutation.mutate()}
               disabled={perfilMutation.isPending}
@@ -166,49 +156,47 @@ export default function VendedorPerfil() {
           </div>
         </div>
 
-        {/* ── Alterar senha ── */}
-        <div className="bg-white rounded-xl shadow-sm">
-          <div className="px-4 py-3 border-b border-wf-border">
-            <p className="text-[10px] font-black text-wf-text-muted uppercase tracking-widest">Alterar senha</p>
+        <div className="space-y-4">
+          {/* ── Alterar senha ── */}
+          <div className="bg-white rounded-xl shadow-sm">
+            <div className="px-4 py-3 border-b border-wf-border">
+              <p className="text-[10px] font-black text-wf-text-muted uppercase tracking-widest">Alterar senha</p>
+            </div>
+            <div className="p-4 space-y-3">
+              <Field label="Senha atual" value={senhaAtual} onChange={setSenhaAtual} type="password" />
+              <Field label="Nova senha" value={novaSenha} onChange={setNovaSenha} type="password" />
+              <Field label="Confirmar nova senha" value={confirmaSenha} onChange={setConfirmaSenha} type="password" />
+              <button
+                onClick={handleSenha}
+                disabled={senhaMutation.isPending || !senhaAtual || !novaSenha || !confirmaSenha}
+                className="w-full py-3 border border-wf-border hover:bg-gray-50 disabled:opacity-50 text-wf-text-primary text-xs font-black uppercase tracking-widest transition-colors mt-1"
+              >
+                {senhaMutation.isPending ? 'Alterando...' : 'Alterar senha'}
+              </button>
+            </div>
           </div>
-          <div className="p-4 space-y-3">
-            <Field label="Senha atual" value={senhaAtual} onChange={setSenhaAtual} type="password" />
-            <Field label="Nova senha" value={novaSenha} onChange={setNovaSenha} type="password" />
-            <Field label="Confirmar nova senha" value={confirmaSenha} onChange={setConfirmaSenha} type="password" />
-            <button
-              onClick={handleSenha}
-              disabled={senhaMutation.isPending || !senhaAtual || !novaSenha || !confirmaSenha}
-              className="w-full py-3 border border-wf-border hover:bg-gray-50 disabled:opacity-50 text-wf-text-primary text-xs font-black uppercase tracking-widest transition-colors mt-1"
-            >
-              {senhaMutation.isPending ? 'Alterando...' : 'Alterar senha'}
-            </button>
-          </div>
-        </div>
 
-        {/* ── Logout ── */}
-        <button
-          onClick={handleLogout}
-          className="w-full py-3 bg-white border border-wf-red/30 hover:bg-wf-red hover:border-wf-red text-wf-red hover:text-white text-xs font-black uppercase tracking-widest transition-all"
-        >
-          Sair da conta
-        </button>
+          {/* ── Logout ── */}
+          <button
+            onClick={handleLogout}
+            className="w-full py-3 bg-white border border-wf-red/30 hover:bg-wf-red hover:border-wf-red text-wf-red hover:text-white text-xs font-black uppercase tracking-widest transition-all rounded-xl"
+          >
+            Sair da conta
+          </button>
+        </div>
+      </div>
       </div>
     </div>
   );
 }
 
 function Field({ label, value, onChange, type = 'text', inputMode }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  type?: string;
-  inputMode?: React.InputHTMLAttributes<HTMLInputElement>['inputMode'];
+  label: string; value: string; onChange: (v: string) => void;
+  type?: string; inputMode?: React.InputHTMLAttributes<HTMLInputElement>['inputMode'];
 }) {
   return (
     <div>
-      <label className="text-[10px] font-bold text-wf-text-muted uppercase tracking-widest block mb-1.5">
-        {label}
-      </label>
+      <label className="text-[10px] font-bold text-wf-text-muted uppercase tracking-widest block mb-1.5">{label}</label>
       <input
         type={type}
         inputMode={inputMode}
@@ -223,12 +211,8 @@ function Field({ label, value, onChange, type = 'text', inputMode }: {
 function ReadonlyField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <label className="text-[10px] font-bold text-wf-text-muted uppercase tracking-widest block mb-1.5">
-        {label}
-      </label>
-      <p className="text-sm text-wf-text-muted bg-gray-50 border border-wf-border px-3 py-2.5">
-        {value}
-      </p>
+      <label className="text-[10px] font-bold text-wf-text-muted uppercase tracking-widest block mb-1.5">{label}</label>
+      <p className="text-sm text-wf-text-muted bg-gray-50 border border-wf-border px-3 py-2.5">{value}</p>
     </div>
   );
 }

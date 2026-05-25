@@ -231,7 +231,7 @@ export default function Dashboard() {
                     >
                       <td className="py-2.5 text-wf-text-secondary font-medium truncate max-w-[120px]">{v.vendedor}</td>
                       <td className="py-2.5 text-wf-text-muted truncate max-w-[100px]">{v.campanha}</td>
-                      <td className="py-2.5 text-right text-green-600 font-semibold">{formatBRL(v.premio_calculado)}</td>
+                      <td className="py-2.5 text-right text-green-600 font-semibold">{formatBRL(Number(v.premio_estimado ?? 0))}</td>
                       <td className="py-2.5 text-right">
                         <Badge variant={statusToBadge(v.status)}>{v.status}</Badge>
                       </td>

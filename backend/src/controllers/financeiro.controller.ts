@@ -83,7 +83,6 @@ export async function getExtrato(req: Request, res: Response, next: NextFunction
 
     let query = db('transacoes')
       .leftJoin('vendas', 'transacoes.venda_id', 'vendas.id')
-      .leftJoin('produtos', 'vendas.produto_id', 'produtos.id')
       .leftJoin('campanhas', 'vendas.campanha_id', 'campanhas.id')
       .where('transacoes.vendedor_id', req.vendedor!.id);
 
@@ -103,7 +102,6 @@ export async function getExtrato(req: Request, res: Response, next: NextFunction
         'transacoes.comprovante_url',
         'transacoes.created_at',
         'transacoes.pago_em',
-        'produtos.nome as produto_nome',
         'campanhas.nome as campanha_nome',
       )
       .orderBy('transacoes.created_at', 'desc')
@@ -112,8 +110,8 @@ export async function getExtrato(req: Request, res: Response, next: NextFunction
 
     const data = rows.map((r) => ({
       ...r,
-      descricao: r.tipo === 'credito' && r.produto_nome
-        ? `${r.produto_nome} — ${r.campanha_nome}`
+      descricao: r.tipo === 'credito' && r.campanha_nome
+        ? `Venda aprovada — ${r.campanha_nome}`
         : r.tipo === 'saque'
           ? `Saque via PIX${r.chave_pix_destino ? ` (${r.chave_pix_destino})` : ''}`
           : r.tipo,

@@ -12,7 +12,8 @@ import { PageLoader } from '../components/ui/Spinner';
 import { useToast } from '../contexts/ToastContext';
 import { vendasService } from '../services/vendas.service';
 
-function formatBRL(v: number) {
+function formatBRL(v: number | null | undefined) {
+  if (v == null) return '—';
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
@@ -154,7 +155,7 @@ export default function Vendas() {
                     <td className="px-4 py-3 text-wf-text-secondary max-w-[140px] truncate">{v.campanha_nome ?? '—'}</td>
                     <td className="px-4 py-3 text-wf-text-secondary">{v.produto_nome ?? '—'}</td>
                     <td className="px-4 py-3 text-right text-wf-text-secondary">{v.metragem}m</td>
-                    <td className="px-4 py-3 text-right text-green-600">{formatBRL(v.premio_calculado)}</td>
+                    <td className="px-4 py-3 text-right text-green-600">{formatBRL(v.premio_apurado ?? v.premio_estimado)}</td>
                     <td className="px-4 py-3 text-center"><Badge variant={statusToBadge(v.status)}>{v.status}</Badge></td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">

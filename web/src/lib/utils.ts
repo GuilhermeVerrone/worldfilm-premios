@@ -1,6 +1,52 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+export type GrupoVenda = {
+  key: string;
+  campanha_id: string;
+  campanha_nome: string;
+  data: string;
+  itens: any[];
+  premio_total: number;
+  status_unico: string | null;
+};
+
+export function groupVendas(vendas: any[]): GrupoVenda[] {
+  const map = new Map<string, GrupoVenda>();
+
+  for (const v of vendas) {
+    const dia = new Date(v.created_at).toLocaleDateString('pt-BR');
+    const key = `${v.campanha_id}__${dia}`;
+
+    if (!map.has(key)) {
+      map.set(key, {
+        key,
+        campanha_id: v.campanha_id,
+        campanha_nome: v.campanha_nome,
+        data: v.created_at,
+        itens: [],
+        premio_total: 0,
+        status_unico: v.status,
+      });
+    }
+
+    const grupo = map.get(key)!;
+    if (grupo.status_unico !== v.status) grupo.status_unico = null;
+    grupo.premio_total += Number(v.premio_estimado ?? 0);
+
+    // Aggregate by product: sum metragem and prize instead of creating duplicates
+    const itemExistente = grupo.itens.find((i) => i.produto_nome === v.produto_nome);
+    if (itemExistente) {
+      itemExistente.metragem = Number(itemExistente.metragem) + Number(v.metragem);
+      itemExistente.premio_estimado = Number(itemExistente.premio_estimado) + Number(v.premio_estimado ?? 0);
+    } else {
+      grupo.itens.push({ ...v });
+    }
+  }
+
+  return Array.from(map.values());
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

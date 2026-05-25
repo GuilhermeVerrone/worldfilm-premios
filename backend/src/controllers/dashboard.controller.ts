@@ -23,7 +23,7 @@ export async function getDashboardResumo(req: Request, res: Response, next: Next
       db('vendas')
         .where({ status: 'aprovada' })
         .whereBetween('validado_em', [inicioMes, fimMes])
-        .sum({ total: db.raw('COALESCE(premio_apurado, 0)') }),
+        .sum({ total: db.raw('COALESCE(premio_apurado_total, 0)') }),
       db('transacoes')
         .where({ tipo: 'saque', status: 'pago' })
         .whereBetween('pago_em', [inicioMes, fimMes])
@@ -66,7 +66,7 @@ export async function getDashboard(req: Request, res: Response, next: NextFuncti
         .join('campanhas', 'vendas.campanha_id', 'campanhas.id')
         .select('campanhas.nome as campanha')
         .count('vendas.id as total')
-        .sum('vendas.premio_estimado as total_premios')
+        .sum('vendas.premio_estimado_total as total_premios')
         .groupBy('campanhas.id', 'campanhas.nome')
         .orderBy('total', 'desc')
         .limit(6),
@@ -77,7 +77,7 @@ export async function getDashboard(req: Request, res: Response, next: NextFuncti
           'vendas.id',
           'vendas.status',
           'vendas.created_at',
-          'vendas.premio_estimado',
+          'vendas.premio_estimado_total as premio_estimado',
           'vendedores.nome as vendedor',
           'campanhas.nome as campanha',
         )

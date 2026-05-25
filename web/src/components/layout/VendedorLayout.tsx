@@ -55,9 +55,7 @@ export function VendedorLayout() {
       try {
         const { data } = await api.get('/notificacoes/nao-lidas/count');
         setNaoLidas(data.count ?? 0);
-      } catch {
-        /* silent */
-      }
+      } catch { /* silent */ }
     }
     fetchCount();
     const timer = setInterval(fetchCount, 60_000);
@@ -76,39 +74,72 @@ export function VendedorLayout() {
 
   async function handleLogout() {
     try {
-      if (refreshToken) {
-        await api.post('/auth/vendedor/logout', { refreshToken });
-      }
-    } catch {
-      /* silent */
-    }
+      if (refreshToken) await api.post('/auth/vendedor/logout', { refreshToken });
+    } catch { /* silent */ }
     logout();
     navigate('/login', { replace: true });
   }
 
   const initials = vendedor?.nome
-    ?.trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase() ?? '';
+    ?.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase() ?? '';
 
   return (
-    <div className="min-h-screen bg-wf-bg text-wf-text-primary flex flex-col">
+    <div className="min-h-screen bg-wf-bg text-wf-text-primary">
 
-      {/* ── Fixed header ── */}
-      <header className="fixed top-0 left-0 right-0 z-30 h-14 bg-[#0f0f0f] flex items-center justify-between px-4">
-        {/* Logo */}
-        <img
-          src="/logo.png"
-          alt="World Film"
-          className="h-8 w-auto object-contain"
-        />
+      {/* ── Sidebar (md+) ── */}
+      <aside className="hidden md:flex fixed inset-y-0 left-0 w-60 flex-col bg-[#111827] z-40 border-r border-white/5">
+        <div className="h-14 flex items-center px-5 shrink-0 border-b border-white/5">
+          <img src="/logo.png" alt="World Film" className="h-8 w-auto object-contain" />
+        </div>
 
-        {/* Actions */}
+        <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
+          {tabs.map((tab) => (
+            <NavLink
+              key={tab.to}
+              to={tab.to}
+              end={tab.to === '/vendedor/home'}
+              className={({ isActive }) => cn(
+                'flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors rounded-sm',
+                isActive ? 'bg-wf-red text-white' : 'text-white/50 hover:text-white hover:bg-white/8',
+              )}
+            >
+              {({ isActive }) => (
+                <>
+                  {tab.icon(isActive)}
+                  <span className="tracking-wide">{tab.label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="shrink-0 px-2 py-3 border-t border-white/10 space-y-1">
+          {vendedor?.nome && (
+            <div className="flex items-center gap-3 px-3 py-2">
+              <div className="w-7 h-7 rounded-full bg-wf-red flex items-center justify-center text-white text-[10px] font-black shrink-0">
+                {initials}
+              </div>
+              <p className="text-white/60 text-xs font-medium truncate">{vendedor.nome}</p>
+            </div>
+          )}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-white/40 hover:text-wf-red hover:bg-white/5 transition-colors rounded-sm"
+          >
+            <svg className="w-[18px] h-[18px] shrink-0" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span className="tracking-wide">Sair da conta</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* ── Top header ── */}
+      <header className="fixed top-0 left-0 right-0 md:left-60 z-30 h-14 bg-[#111827] flex items-center justify-between px-4 border-b border-white/5">
+        <img src="/logo.png" alt="World Film" className="h-8 w-auto object-contain md:hidden" />
+        <div className="hidden md:block" />
+
         <div className="flex items-center gap-1">
-          {/* Notifications */}
           <button
             className="relative p-2 text-white/50 hover:text-white transition-colors"
             onClick={() => navigate('/vendedor/notificacoes')}
@@ -124,9 +155,8 @@ export function VendedorLayout() {
             )}
           </button>
 
-          {/* User avatar + dropdown menu */}
           {vendedor?.nome && (
-            <div ref={menuRef} className="relative">
+            <div ref={menuRef} className="relative md:hidden">
               <button
                 onClick={() => setMenuOpen((o) => !o)}
                 className="flex items-center gap-1.5 pl-1 pr-2 py-1.5 rounded-full hover:bg-white/10 transition-colors"
@@ -165,32 +195,25 @@ export function VendedorLayout() {
       </header>
 
       {/* ── Content ── */}
-      <main className="flex-1 mt-14 mb-16">
-        <div className="w-full max-w-lg mx-auto">
-          <Outlet />
-        </div>
+      <main className="pt-14 pb-20 md:pb-0 md:pl-60 min-h-screen">
+        <Outlet />
       </main>
 
-      {/* ── Bottom navigation ── */}
+      {/* ── Bottom nav (mobile only) ── */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-30 bg-white"
-        style={{
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          boxShadow: '0 -1px 0 rgba(0,0,0,0.06)',
-        }}
+        className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)', boxShadow: '0 -1px 0 rgba(0,0,0,0.06)' }}
       >
-        <div className="h-16 flex items-stretch max-w-lg mx-auto">
+        <div className="h-16 flex items-stretch">
           {tabs.map((tab) => (
             <NavLink
               key={tab.to}
               to={tab.to}
               end={tab.to === '/vendedor/home'}
-              className={({ isActive }) =>
-                cn(
-                  'flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative',
-                  isActive ? 'text-wf-red' : 'text-gray-400',
-                )
-              }
+              className={({ isActive }) => cn(
+                'flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative',
+                isActive ? 'text-wf-red' : 'text-gray-400',
+              )}
             >
               {({ isActive }) => (
                 <>

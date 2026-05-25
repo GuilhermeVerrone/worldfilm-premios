@@ -232,14 +232,26 @@ export async function vendedorGetById(req: Request, res: Response, next: NextFun
     if (!campanha) throw new AppError(404, 'Campanha não encontrada');
 
     const vendedorId = req.vendedor!.id;
-    const [premios, desempenho] = await Promise.all([
+    const [premios, desempenho, metragemPorProduto] = await Promise.all([
       getPremios(req.params.id),
       db('vendas')
         .where({ campanha_id: req.params.id, vendedor_id: vendedorId })
         .count('id as total_vendas')
-        .sum({ total_premio: db.raw('COALESCE(premio_apurado, premio_estimado, 0)') })
+        .sum({ total_premio: db.raw('COALESCE(premio_apurado_total, premio_estimado_total, 0)') })
         .first(),
+      db('venda_itens')
+        .join('vendas', 'venda_itens.venda_id', 'vendas.id')
+        .where('vendas.vendedor_id', vendedorId)
+        .where('vendas.campanha_id', req.params.id)
+        .whereNot('vendas.status', 'reprovada')
+        .groupBy('venda_itens.produto_id')
+        .select('venda_itens.produto_id')
+        .sum('venda_itens.metragem as total_metragem'),
     ]);
+
+    const metragemAcumulada: Record<string, number> = Object.fromEntries(
+      metragemPorProduto.map((r: any) => [r.produto_id, Number(r.total_metragem)]),
+    );
 
     res.json({
       ...campanha,
@@ -249,6 +261,7 @@ export async function vendedorGetById(req: Request, res: Response, next: NextFun
         total_vendas: Number(desempenho?.total_vendas ?? 0),
         total_premio: Number(desempenho?.total_premio ?? 0),
       },
+      metragem_acumulada: metragemAcumulada,
     });
   } catch (err) {
     next(err);

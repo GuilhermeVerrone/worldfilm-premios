@@ -30,7 +30,6 @@ export async function adminList(req: Request, res: Response, next: NextFunction)
     let query = db('vendas')
       .join('vendedores', 'vendas.vendedor_id', 'vendedores.id')
       .join('distribuidores', 'vendedores.distribuidor_id', 'distribuidores.id')
-      .join('produtos', 'vendas.produto_id', 'produtos.id')
       .join('campanhas', 'vendas.campanha_id', 'campanhas.id');
 
     if (status) query = query.where('vendas.status', status);
@@ -45,23 +44,33 @@ export async function adminList(req: Request, res: Response, next: NextFunction)
     const data = await query
       .select(
         'vendas.id',
-        'vendas.metragem',
-        'vendas.premio_estimado',
-        'vendas.premio_apurado',
+        'vendas.premio_estimado_total',
+        'vendas.premio_apurado_total',
         'vendas.status',
         'vendas.created_at',
         'vendas.validado_em',
         'vendedores.nome as vendedor_nome',
         'vendedores.cpf as vendedor_cpf',
         'distribuidores.razao_social as distribuidor_nome',
-        'produtos.nome as produto_nome',
         'campanhas.nome as campanha_nome',
       )
       .orderBy('vendas.created_at', 'asc')
       .limit(limit)
       .offset(offset);
 
-    res.json(paginatedResponse(data, Number(total), page, limit));
+    // Agregar contagem de itens por venda
+    const ids = data.map((v: any) => v.id);
+    let countMap: Record<string, number> = {};
+    if (ids.length > 0) {
+      const counts = await db('venda_itens')
+        .whereIn('venda_id', ids)
+        .groupBy('venda_id')
+        .select('venda_id', db.raw('COUNT(*) as item_count'));
+      countMap = Object.fromEntries(counts.map((c: any) => [c.venda_id, Number(c.item_count)]));
+    }
+
+    const enriched = data.map((v: any) => ({ ...v, item_count: countMap[v.id] ?? 0 }));
+    res.json(paginatedResponse(enriched, Number(total), page, limit));
   } catch (err) {
     next(err);
   }
@@ -71,36 +80,47 @@ export async function adminList(req: Request, res: Response, next: NextFunction)
 
 export async function aprovar(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { metragem_ajustada } = z
-      .object({ metragem_ajustada: z.number().positive().optional() })
-      .parse(req.body);
-
     const venda = await db('vendas').where({ id: req.params.id }).first();
     if (!venda) throw new AppError(404, 'Venda não encontrada');
     if (!['pendente', 'em_analise'].includes(venda.status)) {
       throw new AppError(400, `Venda não pode ser aprovada com status "${venda.status}"`);
     }
 
-    const regra = await db('campanha_premios')
-      .where({ campanha_id: venda.campanha_id, produto_id: venda.produto_id })
-      .first();
-    if (!regra) throw new AppError(400, 'Regra de prêmio não encontrada para esta venda');
+    // Calcular prêmio apurado por item
+    const itens = await db('venda_itens').where({ venda_id: req.params.id });
+    if (itens.length === 0) throw new AppError(400, 'Venda sem itens');
 
-    const metragemFinal = metragem_ajustada ?? Number(venda.metragem);
-    const premio_apurado = calcularPremio(
-      metragemFinal,
-      Number(regra.metragem_corte),
-      Number(regra.valor_premio),
-    );
+    type ItemUpdate = { id: string; premio_apurado: number };
+    const itemUpdates: ItemUpdate[] = [];
+    let premioTotal = 0;
+
+    for (const item of itens) {
+      const regra = await db('campanha_premios')
+        .where({ campanha_id: venda.campanha_id, produto_id: item.produto_id })
+        .first();
+      if (!regra) throw new AppError(400, `Regra de prêmio não encontrada para produto ${item.produto_id}`);
+
+      const premio_apurado = calcularPremio(
+        Number(item.metragem),
+        Number(regra.metragem_corte),
+        Number(regra.valor_premio),
+      );
+      premioTotal += premio_apurado;
+      itemUpdates.push({ id: item.id, premio_apurado });
+    }
 
     const transacaoId = uuidv4();
     const dataLiberacao = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
 
     await db.transaction(async (trx) => {
+      // Atualizar prêmio de cada item
+      for (const upd of itemUpdates) {
+        await trx('venda_itens').where({ id: upd.id }).update({ premio_apurado: upd.premio_apurado });
+      }
+
       await trx('vendas').where({ id: req.params.id }).update({
         status: 'aprovada',
-        metragem: metragemFinal,
-        premio_apurado,
+        premio_apurado_total: premioTotal,
         validado_por: req.admin!.id,
         validado_em: new Date(),
       });
@@ -110,24 +130,24 @@ export async function aprovar(req: Request, res: Response, next: NextFunction): 
         vendedor_id: venda.vendedor_id,
         venda_id: venda.id,
         tipo: 'credito',
-        valor: premio_apurado,
+        valor: premioTotal,
         status: 'bloqueado',
         data_liberacao: dataLiberacao,
       });
 
       await trx('vendedores')
         .where({ id: venda.vendedor_id })
-        .update({ saldo_bloqueado: trx.raw('saldo_bloqueado + ?', [premio_apurado]) });
+        .update({ saldo_bloqueado: trx.raw('saldo_bloqueado + ?', [premioTotal]) });
     });
 
     await enviarPushENotificacao(
       db,
       venda.vendedor_id,
       'Venda aprovada! 🎉',
-      `R$ ${premio_apurado.toFixed(2).replace('.', ',')} será liberado em 5 dias corridos.`,
+      `R$ ${premioTotal.toFixed(2).replace('.', ',')} será liberado em 5 dias corridos.`,
     );
 
-    res.json({ message: 'Venda aprovada', premio_apurado });
+    res.json({ message: 'Venda aprovada', premio_apurado_total: premioTotal });
   } catch (err) {
     next(err);
   }
@@ -198,10 +218,11 @@ export async function exportar(req: Request, res: Response, next: NextFunction):
   try {
     const { filtro, id, status, data_inicio, data_fim } = req.query;
 
-    let query = db('vendas')
+    let query = db('venda_itens')
+      .join('vendas', 'venda_itens.venda_id', 'vendas.id')
       .join('vendedores', 'vendas.vendedor_id', 'vendedores.id')
       .join('distribuidores', 'vendedores.distribuidor_id', 'distribuidores.id')
-      .join('produtos', 'vendas.produto_id', 'produtos.id')
+      .join('produtos', 'venda_itens.produto_id', 'produtos.id')
       .join('campanhas', 'vendas.campanha_id', 'campanhas.id');
 
     if (filtro === 'vendedor' && id) query = query.where('vendas.vendedor_id', id);
@@ -214,9 +235,9 @@ export async function exportar(req: Request, res: Response, next: NextFunction):
       .select(
         'vendas.id',
         'vendas.created_at',
-        'vendas.metragem',
-        'vendas.premio_estimado',
-        'vendas.premio_apurado',
+        'venda_itens.metragem',
+        'venda_itens.premio_estimado',
+        'venda_itens.premio_apurado',
         'vendas.status',
         'vendas.validado_em',
         'vendas.motivo_reprovacao',
@@ -307,27 +328,34 @@ export async function adminGetById(req: Request, res: Response, next: NextFuncti
     const venda = await db('vendas')
       .join('vendedores', 'vendas.vendedor_id', 'vendedores.id')
       .join('distribuidores', 'vendedores.distribuidor_id', 'distribuidores.id')
-      .join('produtos', 'vendas.produto_id', 'produtos.id')
       .join('campanhas', 'vendas.campanha_id', 'campanhas.id')
-      .leftJoin('campanha_premios', (jb) =>
-        jb.on('campanha_premios.campanha_id', 'vendas.campanha_id')
-          .andOn('campanha_premios.produto_id', 'vendas.produto_id'),
-      )
       .select(
         'vendas.*',
         'vendedores.nome as vendedor_nome',
         'vendedores.cpf as vendedor_cpf',
         'distribuidores.razao_social as distribuidor_nome',
-        'produtos.nome as produto_nome',
         'campanhas.nome as campanha_nome',
-        'campanha_premios.metragem_corte',
-        'campanha_premios.valor_premio',
       )
       .where('vendas.id', req.params.id)
       .first();
 
     if (!venda) throw new AppError(404, 'Venda não encontrada');
-    res.json(venda);
+
+    const itens = await db('venda_itens')
+      .join('produtos', 'venda_itens.produto_id', 'produtos.id')
+      .leftJoin('campanha_premios', (jb) =>
+        jb.on('campanha_premios.campanha_id', db.raw('?', [venda.campanha_id]))
+          .andOn('campanha_premios.produto_id', 'venda_itens.produto_id'),
+      )
+      .select(
+        'venda_itens.*',
+        'produtos.nome as produto_nome',
+        'campanha_premios.metragem_corte',
+        'campanha_premios.valor_premio',
+      )
+      .where('venda_itens.venda_id', req.params.id);
+
+    res.json({ ...venda, itens });
   } catch (err) {
     next(err);
   }

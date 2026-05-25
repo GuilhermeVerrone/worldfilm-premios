@@ -6,7 +6,8 @@ export interface Venda {
   status: string;
   metragem: number;
   metragem_ajustada: number | null;
-  premio_calculado: number;
+  premio_estimado: number | null;
+  premio_apurado: number | null;
   observacao: string | null;
   motivo_revisao: string | null;
   created_at: string;

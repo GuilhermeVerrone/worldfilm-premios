@@ -6,6 +6,7 @@ import * as adminCtrl from '../controllers/vendas.admin.controller';
 const router = Router();
 
 // Vendedor
+router.post('/vendas/lote', authenticateVendedor, vendedorCtrl.createVendaLote);
 router.post('/vendas', authenticateVendedor, vendedorCtrl.createVenda);
 router.get('/vendas', authenticateVendedor, vendedorCtrl.listVendas);
 router.get('/vendas/:id', authenticateVendedor, vendedorCtrl.getVendaById);

@@ -11,7 +11,8 @@ import { PageLoader } from '../components/ui/Spinner';
 import { useToast } from '../contexts/ToastContext';
 import { vendasService } from '../services/vendas.service';
 
-function formatBRL(v: number) {
+function formatBRL(v: number | null | undefined) {
+  if (v == null) return '—';
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
@@ -110,7 +111,7 @@ export default function VendaDetalhe() {
             <Row label="Metragem ajustada" value={v.metragem_ajustada ? `${v.metragem_ajustada}m` : null} />
             <div>
               <span className="text-wf-text-muted text-sm">Prêmio calculado:</span>
-              <span className="text-green-600 font-bold text-lg ml-2">{formatBRL(v.premio_calculado)}</span>
+              <span className="text-green-600 font-bold text-lg ml-2">{formatBRL(v.premio_apurado ?? v.premio_estimado)}</span>
             </div>
             {v.observacao && <Row label="Observação" value={v.observacao} />}
             {v.motivo_revisao && <Row label="Motivo revisão" value={v.motivo_revisao} />}

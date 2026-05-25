@@ -7,18 +7,24 @@ import { getPagination, paginatedResponse } from '../utils/paginate';
 import { calcularPremio } from '../services/premio.service';
 import { enviarPushENotificacao } from '../services/notificacao.service';
 
-const createVendaSchema = z.object({
-  campanha_id: z.string().uuid(),
-  produto_id: z.string().uuid(),
-  metragem: z.number().positive(),
-  placa_veiculo: z.string().optional(),
-  nome_cliente: z.string().optional(),
-  cpf_cliente: z.string().optional(),
-});
-
 function formatBRL(value: number): string {
   return value.toFixed(2).replace('.', ',');
 }
+
+// Schema unificado: 1 venda com N itens
+const createVendaSchema = z.object({
+  campanha_id: z.string().uuid(),
+  placa_veiculo: z.string().optional(),
+  nome_cliente: z.string().optional(),
+  cpf_cliente: z.string().optional(),
+  itens: z.array(z.object({
+    produto_id: z.string().min(1),
+    metragem: z.number().positive(),
+  })).min(1),
+});
+
+// Rota legada /vendas/lote — mesmo handler
+export { createVenda as createVendaLote };
 
 export async function createVenda(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -34,69 +40,88 @@ export async function createVenda(req: Request, res: Response, next: NextFunctio
       .first();
     if (!campanha) throw new AppError(400, 'Campanha não encontrada ou fora do período de vigência');
 
-    // 2. Produto participa da campanha
-    const regra = await db('campanha_premios')
-      .where({ campanha_id: body.campanha_id, produto_id: body.produto_id })
-      .first();
-    if (!regra) throw new AppError(400, 'Produto não participa desta campanha');
+    // 2. Validar cada item e calcular prêmios
+    type ItemProcessado = { produto_id: string; metragem: number; premio_estimado: number };
+    const itensProcessados: ItemProcessado[] = [];
+    let premioTotal = 0;
 
-    // 3. Duplicidade por placa no mesmo dia
-    if (body.placa_veiculo) {
-      const inicioDia = new Date(agora); inicioDia.setHours(0, 0, 0, 0);
-      const fimDia = new Date(agora); fimDia.setHours(23, 59, 59, 999);
-
-      const dupPlaca = await db('vendas')
-        .where({
-          vendedor_id: vendedorId,
-          produto_id: body.produto_id,
-          placa_veiculo: body.placa_veiculo,
-        })
-        .whereBetween('created_at', [inicioDia, fimDia])
+    for (const item of body.itens) {
+      const regra = await db('campanha_premios')
+        .where({ campanha_id: body.campanha_id, produto_id: item.produto_id })
         .first();
+      if (!regra) throw new AppError(400, `Produto ${item.produto_id} não participa desta campanha`);
 
-      if (dupPlaca) throw new AppError(409, 'Venda com esta placa e produto já registrada hoje');
+      // Duplicidade por tempo (60 min) na tabela de itens
+      const sessenta = new Date(agora.getTime() - 60 * 60 * 1000);
+      const dupTempo = await db('venda_itens')
+        .join('vendas', 'venda_itens.venda_id', 'vendas.id')
+        .where('vendas.vendedor_id', vendedorId)
+        .where('venda_itens.produto_id', item.produto_id)
+        .where('venda_itens.metragem', item.metragem)
+        .where('vendas.created_at', '>=', sessenta)
+        .first();
+      if (dupTempo) throw new AppError(409, `Venda idêntica para este produto registrada nos últimos 60 minutos`);
+
+      // Metragem acumulada anterior (exclui reprovadas) para calcular prêmio incremental
+      const { total_anterior } = await db('venda_itens')
+        .join('vendas', 'venda_itens.venda_id', 'vendas.id')
+        .where('vendas.vendedor_id', vendedorId)
+        .where('vendas.campanha_id', body.campanha_id)
+        .where('venda_itens.produto_id', item.produto_id)
+        .whereNot('vendas.status', 'reprovada')
+        .sum('venda_itens.metragem as total_anterior')
+        .first() as any;
+
+      const metragemAnterior = Number(total_anterior ?? 0);
+      const corte = Number(regra.metragem_corte);
+      const valor = Number(regra.valor_premio);
+      const premio_estimado = calcularPremio(metragemAnterior + item.metragem, corte, valor)
+        - calcularPremio(metragemAnterior, corte, valor);
+
+      premioTotal += premio_estimado;
+      itensProcessados.push({ produto_id: item.produto_id, metragem: item.metragem, premio_estimado });
     }
 
-    // 4. Duplicidade por tempo (60 min)
-    const sessenta = new Date(agora.getTime() - 60 * 60 * 1000);
-    const dupTempo = await db('vendas')
-      .where({ vendedor_id: vendedorId, produto_id: body.produto_id, metragem: body.metragem })
-      .where('created_at', '>=', sessenta)
-      .first();
-    if (dupTempo) throw new AppError(409, 'Venda idêntica registrada nos últimos 60 minutos');
-
-    // 5. Calcular prêmio estimado
-    const premio_estimado = calcularPremio(
-      body.metragem,
-      Number(regra.metragem_corte),
-      Number(regra.valor_premio),
-    );
-
-    // 6. Criar venda
+    // 3. Criar 1 venda + N itens em transação
     const vendaId = uuidv4();
-    await db('vendas').insert({
-      id: vendaId,
-      vendedor_id: vendedorId,
-      campanha_id: body.campanha_id,
-      produto_id: body.produto_id,
-      metragem: body.metragem,
-      placa_veiculo: body.placa_veiculo ?? null,
-      nome_cliente: body.nome_cliente ?? null,
-      cpf_cliente: body.cpf_cliente ?? null,
-      premio_estimado,
-      status: 'pendente',
+    await db.transaction(async (trx) => {
+      await trx('vendas').insert({
+        id: vendaId,
+        vendedor_id: vendedorId,
+        campanha_id: body.campanha_id,
+        placa_veiculo: body.placa_veiculo ?? null,
+        nome_cliente: body.nome_cliente ?? null,
+        cpf_cliente: body.cpf_cliente ?? null,
+        premio_estimado_total: premioTotal,
+        status: 'pendente',
+      });
+
+      for (const item of itensProcessados) {
+        await trx('venda_itens').insert({
+          id: uuidv4(),
+          venda_id: vendaId,
+          produto_id: item.produto_id,
+          metragem: item.metragem,
+          premio_estimado: item.premio_estimado,
+        });
+      }
     });
 
-    // 7. Push
+    // 4. Push
     await enviarPushENotificacao(
       db,
       vendedorId,
       'Venda registrada! ✅',
-      `Seu prêmio estimado é R$ ${formatBRL(premio_estimado)}. Aguarde a validação em até 3 dias úteis.`,
+      `Prêmio estimado: R$ ${formatBRL(premioTotal)}. Aguarde a validação em até 3 dias úteis.`,
     );
 
     const venda = await db('vendas').where({ id: vendaId }).first();
-    res.status(201).json(venda);
+    const itens = await db('venda_itens')
+      .join('produtos', 'venda_itens.produto_id', 'produtos.id')
+      .select('venda_itens.*', 'produtos.nome as produto_nome')
+      .where('venda_itens.venda_id', vendaId);
+
+    res.status(201).json({ ...venda, itens });
   } catch (err) {
     next(err);
   }
@@ -110,7 +135,6 @@ export async function listVendas(req: Request, res: Response, next: NextFunction
 
     let query = db('vendas')
       .join('campanhas', 'vendas.campanha_id', 'campanhas.id')
-      .join('produtos', 'vendas.produto_id', 'produtos.id')
       .where('vendas.vendedor_id', vendedorId);
 
     if (status) query = query.where('vendas.status', status);
@@ -120,17 +144,49 @@ export async function listVendas(req: Request, res: Response, next: NextFunction
 
     const [{ total }] = await query.clone().count('vendas.id as total');
 
-    const data = await query
+    const vendas = await query
       .select(
-        'vendas.*',
+        'vendas.id as venda_id',
+        'vendas.status',
+        'vendas.created_at',
+        'vendas.campanha_id',
         'campanhas.nome as campanha_nome',
-        'produtos.nome as produto_nome',
       )
       .orderBy('vendas.created_at', 'desc')
       .limit(limit)
       .offset(offset);
 
-    res.json(paginatedResponse(data, Number(total), page, limit));
+    const vendaIds = vendas.map((v: any) => v.venda_id);
+    const itens = vendaIds.length > 0
+      ? await db('venda_itens')
+          .join('produtos', 'venda_itens.produto_id', 'produtos.id')
+          .whereIn('venda_itens.venda_id', vendaIds)
+          .select(
+            'venda_itens.id',
+            'venda_itens.venda_id',
+            'venda_itens.metragem',
+            'venda_itens.premio_estimado',
+            'produtos.nome as produto_nome',
+          )
+      : [];
+
+    // Group itens by venda_id and nest inside each venda
+    const itensPorVenda: Record<string, any[]> = {};
+    for (const item of itens as any[]) {
+      if (!itensPorVenda[item.venda_id]) itensPorVenda[item.venda_id] = [];
+      itensPorVenda[item.venda_id].push(item);
+    }
+
+    const enriched = vendas.map((v: any) => ({
+      id: v.venda_id,
+      status: v.status,
+      created_at: v.created_at,
+      campanha_id: v.campanha_id,
+      campanha_nome: v.campanha_nome,
+      itens: itensPorVenda[v.venda_id] ?? [],
+    }));
+
+    res.json(paginatedResponse(enriched, Number(total), page, limit));
   } catch (err) {
     next(err);
   }
@@ -140,14 +196,19 @@ export async function getVendaById(req: Request, res: Response, next: NextFuncti
   try {
     const venda = await db('vendas')
       .join('campanhas', 'vendas.campanha_id', 'campanhas.id')
-      .join('produtos', 'vendas.produto_id', 'produtos.id')
-      .select('vendas.*', 'campanhas.nome as campanha_nome', 'produtos.nome as produto_nome')
+      .select('vendas.*', 'campanhas.nome as campanha_nome')
       .where('vendas.id', req.params.id)
       .where('vendas.vendedor_id', req.vendedor!.id)
       .first();
 
     if (!venda) throw new AppError(404, 'Venda não encontrada');
-    res.json(venda);
+
+    const itens = await db('venda_itens')
+      .join('produtos', 'venda_itens.produto_id', 'produtos.id')
+      .select('venda_itens.*', 'produtos.nome as produto_nome')
+      .where('venda_itens.venda_id', req.params.id);
+
+    res.json({ ...venda, itens });
   } catch (err) {
     next(err);
   }

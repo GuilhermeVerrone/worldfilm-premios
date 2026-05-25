@@ -81,15 +81,18 @@ export async function adminGetById(req: Request, res: Response, next: NextFuncti
     const [vendasResumo] = await db('vendas')
       .where({ vendedor_id: req.params.id })
       .count('id as total_vendas')
-      .sum({ total_premio: db.raw('COALESCE(premio_apurado, 0)') });
+      .sum({ total_premio: db.raw('COALESCE(premio_apurado_total, 0)') });
 
     const vendas = await db('vendas')
       .leftJoin('campanhas', 'vendas.campanha_id', 'campanhas.id')
-      .leftJoin('produtos', 'vendas.produto_id', 'produtos.id')
       .select(
-        'vendas.*',
+        'vendas.id',
+        'vendas.status',
+        'vendas.premio_estimado_total',
+        'vendas.premio_apurado_total',
+        'vendas.created_at',
+        'vendas.campanha_id',
         'campanhas.nome as campanha_nome',
-        'produtos.nome as produto_nome',
       )
       .where('vendas.vendedor_id', req.params.id)
       .orderBy('vendas.created_at', 'desc');
@@ -266,7 +269,7 @@ export async function resumoMes(req: Request, res: Response, next: NextFunction)
       .where({ vendedor_id: vendedorId })
       .whereBetween('created_at', [inicioMes, fimMes])
       .count('id as vendas_mes')
-      .sum({ premio_acumulado_mes: db.raw('COALESCE(premio_estimado, 0)') });
+      .sum({ premio_acumulado_mes: db.raw('COALESCE(premio_estimado_total, 0)') });
 
     const rankingRows = await db('vendas')
       .join('vendedores', 'vendas.vendedor_id', 'vendedores.id')
@@ -275,7 +278,7 @@ export async function resumoMes(req: Request, res: Response, next: NextFunction)
       .whereBetween('vendas.created_at', [inicioMes, fimMes])
       .groupBy('vendas.vendedor_id')
       .select('vendas.vendedor_id')
-      .sum({ total_premio: db.raw('COALESCE(vendas.premio_estimado, 0)') })
+      .sum({ total_premio: db.raw('COALESCE(vendas.premio_estimado_total, 0)') })
       .orderBy('total_premio', 'desc');
 
     const pos = rankingRows.findIndex((r) => r.vendedor_id === vendedorId);

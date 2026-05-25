@@ -14,7 +14,7 @@ export interface DashboardData {
     id: string;
     status: string;
     created_at: string;
-    premio_calculado: number;
+    premio_estimado: number;
     vendedor: string;
     campanha: string;
   }[];
