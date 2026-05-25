@@ -80,20 +80,20 @@ const schema1 = z.object({
   ),
 });
 
-const schema2 = z
-  .object({
-    senha: z
-      .string()
-      .min(8, 'Mínimo 8 caracteres')
-      .regex(/\d/, 'Deve conter ao menos 1 número')
-      .regex(/[A-Z]/, 'Deve conter ao menos 1 letra maiúscula'),
-    confirmaSenha: z.string().min(1, 'Confirme a senha'),
-    email: z.union([z.string().email('E-mail inválido'), z.literal('')]).optional(),
-  })
-  .refine((d) => d.senha === d.confirmaSenha, {
-    message: 'As senhas não coincidem',
-    path: ['confirmaSenha'],
-  });
+const schema2Base = z.object({
+  senha: z
+    .string()
+    .min(8, 'Mínimo 8 caracteres')
+    .regex(/\d/, 'Deve conter ao menos 1 número')
+    .regex(/[A-Z]/, 'Deve conter ao menos 1 letra maiúscula'),
+  confirmaSenha: z.string().min(1, 'Confirme a senha'),
+  email: z.union([z.string().email('E-mail inválido'), z.literal('')]).optional(),
+});
+
+const schema2 = schema2Base.refine((d) => d.senha === d.confirmaSenha, {
+  message: 'As senhas não coincidem',
+  path: ['confirmaSenha'],
+});
 
 const schema3 = z.object({
   distribuidor_id: z.string().min(1, 'Selecione um distribuidor'),
@@ -382,7 +382,7 @@ export default function Cadastro() {
                   placeholder="••••••••"
                   value={senha}
                   onChange={(e) => { setSenha(e.target.value); clearError('senha'); }}
-                  onBlur={() => blurField('senha', schema2.shape.senha, senha)}
+                  onBlur={() => blurField('senha', schema2Base.shape.senha, senha)}
                   error={errors.senha}
                   autoFocus
                 />
