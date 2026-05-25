@@ -28,7 +28,7 @@ export async function unifiedLogin(req: Request, res: Response, next: NextFuncti
       const refreshToken = signRefreshToken({ id: admin.id, role: 'admin' });
 
       await db('refresh_tokens').insert({
-        id: db.raw('(UUID())'),
+        id: db.raw('gen_random_uuid()'),
         token: refreshToken,
         owner_type: 'admin',
         owner_id: admin.id,
@@ -76,7 +76,7 @@ export async function unifiedLogin(req: Request, res: Response, next: NextFuncti
         const refreshToken = signRefreshToken({ id: vendedor.id, role: 'admin' });
 
         await db('refresh_tokens').insert({
-          id: db.raw('(UUID())'),
+          id: db.raw('gen_random_uuid()'),
           token: refreshToken,
           owner_type: 'admin',
           owner_id: vendedor.id,
@@ -97,7 +97,7 @@ export async function unifiedLogin(req: Request, res: Response, next: NextFuncti
       const refreshToken = signRefreshToken({ id: vendedor.id, role: 'vendedor' });
 
       await db('refresh_tokens').insert({
-        id: db.raw('(UUID())'),
+        id: db.raw('gen_random_uuid()'),
         token: refreshToken,
         owner_type: 'vendedor',
         owner_id: vendedor.id,

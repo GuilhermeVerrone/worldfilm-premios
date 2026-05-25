@@ -47,7 +47,7 @@ export async function list(req: Request, res: Response, next: NextFunction): Pro
       .modify(applyFilters)
       .select(
         'distribuidores.*',
-        db.raw('(SELECT COUNT(*) FROM vendedores WHERE distribuidor_id = distribuidores.id AND status = "aprovado") as vendedores_ativos'),
+        db.raw("(SELECT COUNT(*) FROM vendedores WHERE distribuidor_id = distribuidores.id AND status = 'aprovado') as vendedores_ativos"),
       )
       .orderBy('razao_social')
       .limit(limit)
@@ -84,7 +84,7 @@ export async function create(req: Request, res: Response, next: NextFunction): P
     if (existing) throw new AppError(409, 'CNPJ já cadastrado');
 
     await db('distribuidores').insert({
-      id: db.raw('(UUID())'),
+      id: db.raw('gen_random_uuid()'),
       ...body,
       cnpj,
       status: body.status ?? 'ativo',

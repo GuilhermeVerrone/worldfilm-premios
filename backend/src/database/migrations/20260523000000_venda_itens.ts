@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 export async function up(knex: Knex): Promise<void> {
   // 1. Create venda_itens (N products per venda)
   await knex.schema.createTable('venda_itens', (t) => {
-    t.uuid('id').primary().defaultTo(knex.raw('(UUID())'));
+    t.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     t.uuid('venda_id').notNullable().references('id').inTable('vendas').onDelete('CASCADE');
     t.uuid('produto_id').notNullable().references('id').inTable('produtos').onDelete('RESTRICT');
     t.decimal('metragem', 8, 2).notNullable();
@@ -42,7 +42,7 @@ export async function up(knex: Knex): Promise<void> {
   }
 
   // 4. Drop FK, index, and old columns from vendas (MySQL)
-  await knex.raw('ALTER TABLE vendas DROP FOREIGN KEY vendas_produto_id_foreign');
+  await knex.raw('ALTER TABLE vendas DROP CONSTRAINT IF EXISTS vendas_produto_id_foreign');
   await knex.schema.table('vendas', (t) => {
     t.dropIndex(['produto_id']);
     t.dropColumn('produto_id');

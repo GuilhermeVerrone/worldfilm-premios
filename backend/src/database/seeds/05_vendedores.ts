@@ -9,7 +9,7 @@ export async function seed(knex: Knex): Promise<void> {
 
   await knex('vendedores').insert([
     {
-      id: knex.raw('(UUID())'),
+      id: knex.raw('gen_random_uuid()'),
       distribuidor_id: DISTRIBUIDOR_IDS.sul,
       nome: 'Pedro Almeida Santos',
       cpf: '111.222.333-44',
@@ -23,7 +23,7 @@ export async function seed(knex: Knex): Promise<void> {
       saldo_bloqueado: 0,
     },
     {
-      id: knex.raw('(UUID())'),
+      id: knex.raw('gen_random_uuid()'),
       distribuidor_id: DISTRIBUIDOR_IDS.sudeste,
       nome: 'Maria Oliveira Lima',
       cpf: '222.333.444-55',
@@ -37,7 +37,7 @@ export async function seed(knex: Knex): Promise<void> {
       saldo_bloqueado: 45.00,
     },
     {
-      id: knex.raw('(UUID())'),
+      id: knex.raw('gen_random_uuid()'),
       distribuidor_id: DISTRIBUIDOR_IDS.nordeste,
       nome: 'Roberto Costa Neto',
       cpf: '333.444.555-66',

@@ -44,7 +44,7 @@ export async function register(req: Request, res: Response, next: NextFunction):
     const cnpj = body.cnpj ? formatCNPJ(body.cnpj) : null;
 
     const [id] = await db('vendedores').insert({
-      id: db.raw('(UUID())'),
+      id: db.raw('gen_random_uuid()'),
       distribuidor_id: body.distribuidor_id,
       nome: body.nome,
       cpf,
@@ -96,7 +96,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     await db('refresh_tokens').insert({
-      id: db.raw('(UUID())'),
+      id: db.raw('gen_random_uuid()'),
       token: refreshToken,
       owner_type: 'vendedor',
       owner_id: vendedor.id,
@@ -139,7 +139,7 @@ export async function refresh(req: Request, res: Response, next: NextFunction): 
     await db.transaction(async (trx) => {
       await trx('refresh_tokens').where({ id: stored.id }).update({ revogado: true });
       await trx('refresh_tokens').insert({
-        id: trx.raw('(UUID())'),
+        id: trx.raw('gen_random_uuid()'),
         token: newRefresh,
         owner_type: 'vendedor',
         owner_id: vendedor.id,

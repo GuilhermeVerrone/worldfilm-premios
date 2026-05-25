@@ -8,7 +8,7 @@ export async function seed(knex: Knex): Promise<void> {
 
   await knex('admins').insert([
     {
-      id: knex.raw('(UUID())'),
+      id: knex.raw('gen_random_uuid()'),
       nome: 'Admin World Film',
       email: 'admin@worldfilm.com.br',
       senha,

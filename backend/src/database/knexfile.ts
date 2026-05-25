@@ -5,7 +5,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const config: Record<string, Knex.Config> = {
   development: {
-    client: 'mysql2',
+    client: 'pg',
     connection: process.env.DATABASE_URL,
     migrations: {
       directory: './migrations',
@@ -19,7 +19,7 @@ const config: Record<string, Knex.Config> = {
   },
 
   staging: {
-    client: 'mysql2',
+    client: 'pg',
     connection: process.env.DATABASE_URL,
     migrations: {
       directory: './migrations',
@@ -33,7 +33,7 @@ const config: Record<string, Knex.Config> = {
   },
 
   production: {
-    client: 'mysql2',
+    client: 'pg',
     connection: process.env.DATABASE_URL,
     migrations: {
       directory: './migrations',

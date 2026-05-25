@@ -44,7 +44,7 @@ export async function adminGetById(req: Request, res: Response, next: NextFuncti
 export async function create(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const body = produtoSchema.parse(req.body);
-    await db('produtos').insert({ id: db.raw('(UUID())'), ...body, ativo: body.ativo ?? true });
+    await db('produtos').insert({ id: db.raw('gen_random_uuid()'), ...body, ativo: body.ativo ?? true });
     const created = await db('produtos').orderBy('created_at', 'desc').first();
     res.status(201).json(created);
   } catch (err) {

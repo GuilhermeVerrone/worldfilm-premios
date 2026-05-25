@@ -46,7 +46,7 @@ export async function salvarNotificacao(
   corpo: string,
 ): Promise<void> {
   await dbConn('notificacoes').insert({
-    id: dbConn.raw('(UUID())'),
+    id: dbConn.raw('gen_random_uuid()'),
     vendedor_id: vendedorId,
     titulo,
     corpo,

@@ -3,7 +3,7 @@ import type { Knex } from 'knex';
 export async function up(knex: Knex): Promise<void> {
   // admins
   await knex.schema.createTable('admins', (t) => {
-    t.uuid('id').primary().defaultTo(knex.raw('(UUID())'));
+    t.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     t.string('nome', 100).notNullable();
     t.string('email', 150).notNullable().unique();
     t.string('senha', 255).notNullable();
@@ -14,7 +14,7 @@ export async function up(knex: Knex): Promise<void> {
 
   // distribuidores
   await knex.schema.createTable('distribuidores', (t) => {
-    t.uuid('id').primary().defaultTo(knex.raw('(UUID())'));
+    t.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     t.string('razao_social', 200).notNullable();
     t.string('cnpj', 18).notNullable().unique();
     t.string('responsavel', 100).notNullable();
@@ -30,7 +30,7 @@ export async function up(knex: Knex): Promise<void> {
 
   // vendedores
   await knex.schema.createTable('vendedores', (t) => {
-    t.uuid('id').primary().defaultTo(knex.raw('(UUID())'));
+    t.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     t.uuid('distribuidor_id').notNullable().references('id').inTable('distribuidores').onDelete('RESTRICT');
     t.string('nome', 200).notNullable();
     t.string('cpf', 14).notNullable().unique();
@@ -53,7 +53,7 @@ export async function up(knex: Knex): Promise<void> {
 
   // produtos
   await knex.schema.createTable('produtos', (t) => {
-    t.uuid('id').primary().defaultTo(knex.raw('(UUID())'));
+    t.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     t.string('nome', 200).notNullable();
     t.string('linha', 100).notNullable();
     t.enum('categoria', ['pelicula', 'ppf', 'outro']).notNullable();
@@ -67,7 +67,7 @@ export async function up(knex: Knex): Promise<void> {
 
   // campanhas
   await knex.schema.createTable('campanhas', (t) => {
-    t.uuid('id').primary().defaultTo(knex.raw('(UUID())'));
+    t.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     t.string('nome', 200).notNullable();
     t.enum('tipo', ['lancamento', 'vendas', 'especial']).notNullable();
     t.text('descricao').nullable();
@@ -85,7 +85,7 @@ export async function up(knex: Knex): Promise<void> {
 
   // campanha_premios
   await knex.schema.createTable('campanha_premios', (t) => {
-    t.uuid('id').primary().defaultTo(knex.raw('(UUID())'));
+    t.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     t.uuid('campanha_id').notNullable().references('id').inTable('campanhas').onDelete('CASCADE');
     t.uuid('produto_id').notNullable().references('id').inTable('produtos').onDelete('RESTRICT');
     t.decimal('metragem_corte', 8, 2).notNullable();
@@ -98,7 +98,7 @@ export async function up(knex: Knex): Promise<void> {
 
   // vendas
   await knex.schema.createTable('vendas', (t) => {
-    t.uuid('id').primary().defaultTo(knex.raw('(UUID())'));
+    t.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     t.uuid('vendedor_id').notNullable().references('id').inTable('vendedores').onDelete('RESTRICT');
     t.uuid('campanha_id').notNullable().references('id').inTable('campanhas').onDelete('RESTRICT');
     t.uuid('produto_id').notNullable().references('id').inTable('produtos').onDelete('RESTRICT');
@@ -123,7 +123,7 @@ export async function up(knex: Knex): Promise<void> {
 
   // transacoes
   await knex.schema.createTable('transacoes', (t) => {
-    t.uuid('id').primary().defaultTo(knex.raw('(UUID())'));
+    t.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     t.uuid('vendedor_id').notNullable().references('id').inTable('vendedores').onDelete('RESTRICT');
     t.uuid('venda_id').nullable().references('id').inTable('vendas').onDelete('SET NULL');
     t.enum('tipo', ['credito', 'saque', 'estorno']).notNullable();
@@ -144,7 +144,7 @@ export async function up(knex: Knex): Promise<void> {
 
   // notificacoes
   await knex.schema.createTable('notificacoes', (t) => {
-    t.uuid('id').primary().defaultTo(knex.raw('(UUID())'));
+    t.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     t.uuid('vendedor_id').nullable().references('id').inTable('vendedores').onDelete('CASCADE');
     t.string('titulo', 200).notNullable();
     t.text('corpo').notNullable();
@@ -159,7 +159,7 @@ export async function up(knex: Knex): Promise<void> {
 
   // refresh_tokens
   await knex.schema.createTable('refresh_tokens', (t) => {
-    t.uuid('id').primary().defaultTo(knex.raw('(UUID())'));
+    t.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     t.string('token', 500).notNullable().unique();
     t.enum('owner_type', ['admin', 'vendedor']).notNullable();
     t.uuid('owner_id').notNullable();
