@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:shared": "npm run build --workspace=shared",
+    "build:shared": "tsc -p ../shared/tsconfig.json",
     "build:web": "npm run build",
     "build": "tsc && vite build",
     "preview": "vite preview",
