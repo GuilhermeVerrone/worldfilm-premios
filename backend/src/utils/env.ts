@@ -18,7 +18,7 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET!,
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET!,
   port: parseInt(process.env.PORT ?? '3001', 10),
-  nodeEnv: process.env.NODE_ENV as 'development' | 'staging' | 'production',
+  nodeEnv: process.env.NODE_ENV as 'development' | 'staging' | 'production' | 'test',
   uploadPath: process.env.UPLOAD_PATH ?? './uploads',
   firebaseServiceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH ?? '',
 };

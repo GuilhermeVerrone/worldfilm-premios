@@ -3,7 +3,7 @@ import { validateEnv, env } from './utils/env';
 
 validateEnv();
 
-import express from 'express';
+import express, { type Request, type Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -32,7 +32,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.resolve(env.uploadPath)));
 
-app.get('/health', (_req, res) => res.json({ status: 'ok', env: env.nodeEnv }));
+app.get('/health', (_req: Request, res: Response) => res.json({ status: 'ok', env: env.nodeEnv }));
 
 app.use('/auth', authRoutes);
 app.get('/distribuidores/lista-publica', distribuidoresListPublic);

@@ -271,7 +271,12 @@ export async function resumoMes(req: Request, res: Response, next: NextFunction)
       .count('id as vendas_mes')
       .sum({ premio_acumulado_mes: db.raw('COALESCE(premio_estimado_total, 0)') });
 
-    const rankingRows = await db('vendas')
+    type RankingRow = {
+      vendedor_id: string;
+      total_premio?: string | number;
+    };
+
+    const rankingRows = (await db('vendas')
       .join('vendedores', 'vendas.vendedor_id', 'vendedores.id')
       .where('vendedores.distribuidor_id', distribuidorId)
       .where('vendedores.status', 'aprovado')
@@ -279,7 +284,7 @@ export async function resumoMes(req: Request, res: Response, next: NextFunction)
       .groupBy('vendas.vendedor_id')
       .select('vendas.vendedor_id')
       .sum({ total_premio: db.raw('COALESCE(vendas.premio_estimado_total, 0)') })
-      .orderBy('total_premio', 'desc');
+      .orderBy('total_premio', 'desc')) as RankingRow[];
 
     const pos = rankingRows.findIndex((r) => r.vendedor_id === vendedorId);
     const ranking_distribuidor = pos >= 0 ? pos + 1 : rankingRows.length + 1;
