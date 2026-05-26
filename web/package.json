@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:shared": "tsc -p ../shared/tsconfig.json",
+    "build:shared": "npx tsc -p ../shared/tsconfig.json",
     "build:web": "npm run build",
-    "build": "tsc && vite build",
+    "build": "npx tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext ts,tsx"
   },
