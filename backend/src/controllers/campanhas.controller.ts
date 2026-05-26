@@ -34,6 +34,28 @@ const campanhaSchema = z.object({
   path: ['data_fim'],
 });
 
+const campanhaUpdateSchema = z
+  .object({
+    nome: z.string().min(2).optional(),
+    tipo: z.enum(['lancamento', 'vendas', 'especial']).optional(),
+    descricao: z.string().optional(),
+    data_inicio: z.string().datetime().optional(),
+    data_fim: z.string().datetime().optional(),
+    status: z.enum(['rascunho', 'ativa', 'encerrada', 'arquivada']).optional(),
+    segmentacao: segmentacaoSchema.optional(),
+    premios: z.array(premioSchema).min(1).optional(),
+  })
+  .refine(
+    (d) => {
+      if (!d.data_inicio || !d.data_fim) return true;
+      return new Date(d.data_fim) > new Date(d.data_inicio);
+    },
+    {
+      message: 'data_fim deve ser maior que data_inicio',
+      path: ['data_fim'],
+    },
+  );
+
 // ─── helpers ───────────────────────────────────────────────────────────────
 
 function parseSeg(raw: unknown): CampanhaSegmentacao {
@@ -136,9 +158,7 @@ export async function update(req: Request, res: Response, next: NextFunction): P
     if (!campanha) throw new AppError(404, 'Campanha não encontrada');
     if (campanha.status === 'encerrada') throw new AppError(400, 'Não é possível editar uma campanha encerrada');
 
-    const { premios, ...body } = campanhaSchema.partial().omit({ premios: true }).and(
-      z.object({ premios: z.array(premioSchema).min(1).optional() }),
-    ).parse(req.body);
+    const { premios, ...body } = campanhaUpdateSchema.parse(req.body);
 
     await db.transaction(async (trx) => {
       const updateData: Record<string, unknown> = { ...body };
@@ -148,7 +168,7 @@ export async function update(req: Request, res: Response, next: NextFunction): P
       if (premios) {
         await trx('campanha_premios').where({ campanha_id: req.params.id }).delete();
         await trx('campanha_premios').insert(
-          premios.map((p) => ({
+          premios.map((p: z.infer<typeof premioSchema>) => ({
             id: uuidv4(),
             campanha_id: req.params.id,
             produto_id: p.produto_id,
