@@ -4,8 +4,10 @@ import type { PaginatedResponse } from './distribuidores.service';
 export interface Produto {
   id: string;
   nome: string;
-  descricao: string | null;
-  unidade: string;
+  linha: string;
+  categoria: 'pelicula' | 'ppf' | 'outro';
+  espessura?: string;
+  largura?: string;
   ativo: boolean;
   created_at: string;
 }

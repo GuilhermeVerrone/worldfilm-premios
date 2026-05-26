@@ -11,6 +11,7 @@ import { PageLoader } from '../components/ui/Spinner';
 import { useToast } from '../contexts/ToastContext';
 import { campanhasService, type Premio } from '../services/campanhas.service';
 import { produtosService } from '../services/produtos.service';
+import { distribuidoresService } from '../services/distribuidores.service';
 
 interface PremioRow extends Premio {
   produto_nome?: string;
@@ -35,6 +36,11 @@ export default function Campanhas() {
   const produtosQuery = useQuery({
     queryKey: ['produtos-all'],
     queryFn: () => produtosService.list({ ativo: true, limit: 100 }),
+  });
+
+  const distribuidoresQuery = useQuery({
+    queryKey: ['distribuidores-all'],
+    queryFn: () => distribuidoresService.list({ limit: 100 }),
   });
 
   const createMutation = useMutation({
@@ -161,10 +167,61 @@ export default function Campanhas() {
               >
                 <option value="todos">Todos os vendedores</option>
                 <option value="distribuidores">Distribuidores específicos</option>
+                <option value="regioes">Regiões específicas</option>
               </Select>
+              {form.segmentacao?.tipo === 'distribuidores' && (
+                <div>
+                  <p className="text-xs text-wf-text-secondary mb-2">Selecione os distribuidores:</p>
+                  <div className="space-y-1 max-h-48 overflow-y-auto border border-wf-border rounded p-2">
+                    {distribuidoresQuery.data?.data.map((d) => (
+                      <label key={d.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={(form.segmentacao?.distribuidores ?? []).includes(d.id)}
+                          onChange={(e) => {
+                            const current: string[] = form.segmentacao?.distribuidores ?? [];
+                            const next = e.target.checked ? [...current, d.id] : current.filter((x: string) => x !== d.id);
+                            setForm((f: any) => ({ ...f, segmentacao: { tipo: 'distribuidores', distribuidores: next } }));
+                          }}
+                        />
+                        {d.razao_social}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {form.segmentacao?.tipo === 'regioes' && (
+                <div>
+                  <p className="text-xs text-wf-text-secondary mb-2">Selecione as regiões:</p>
+                  <div className="space-y-1">
+                    {['Sul', 'Sudeste', 'Nordeste', 'Norte', 'Centro-Oeste'].map((r) => (
+                      <label key={r} className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={(form.segmentacao?.regioes ?? []).includes(r)}
+                          onChange={(e) => {
+                            const current: string[] = form.segmentacao?.regioes ?? [];
+                            const next = e.target.checked ? [...current, r] : current.filter((x: string) => x !== r);
+                            setForm((f: any) => ({ ...f, segmentacao: { tipo: 'regioes', regioes: next } }));
+                          }}
+                        />
+                        {r}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="flex gap-3">
                 <Button variant="ghost" onClick={() => setWizardStep(1)}>← Voltar</Button>
-                <Button onClick={() => setWizardStep(3)}>Próximo →</Button>
+                <Button
+                  onClick={() => setWizardStep(3)}
+                  disabled={
+                    (form.segmentacao?.tipo === 'distribuidores' && !(form.segmentacao?.distribuidores?.length > 0)) ||
+                    (form.segmentacao?.tipo === 'regioes' && !(form.segmentacao?.regioes?.length > 0))
+                  }
+                >
+                  Próximo →
+                </Button>
               </div>
             </div>
           )}
