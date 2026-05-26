@@ -73,7 +73,7 @@ async function getStats(campanhaId: string) {
   const [row] = await db('vendas')
     .where({ campanha_id: campanhaId })
     .count('id as total_vendas')
-    .sum({ total_premios: db.raw('COALESCE(premio_apurado, 0)') });
+    .sum({ total_premios: db.raw('COALESCE(premio_apurado_total, 0)') });
   return { total_vendas: Number(row.total_vendas), total_premios: Number(row.total_premios ?? 0) };
 }
 
