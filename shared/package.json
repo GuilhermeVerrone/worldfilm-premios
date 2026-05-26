@@ -8,7 +8,7 @@
     "build": "npx tsc",
     "dev": "npx tsc --watch"
   },
-  "devDependencies": {
+  "dependencies": {
     "typescript": "^5.5.2"
   }
 }
