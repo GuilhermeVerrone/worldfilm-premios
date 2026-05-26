@@ -26,7 +26,7 @@ export const vendedoresService = {
   aprovar: (id: string) => api.patch(`/admin/vendedores/${id}/aprovar`).then((r) => r.data),
   reprovar: (id: string, motivo: string) =>
     api.patch(`/admin/vendedores/${id}/reprovar`, { motivo }).then((r) => r.data),
-  bloquear: (id: string) => api.patch(`/admin/vendedores/${id}/bloquear`).then((r) => r.data),
+  bloquear: (id: string, motivo: string) => api.patch(`/admin/vendedores/${id}/bloquear`, { motivo }).then((r) => r.data),
   desbloquear: (id: string) => api.patch(`/admin/vendedores/${id}/desbloquear`).then((r) => r.data),
   changeRole: (id: string, role: 'vendedor' | 'admin') =>
     api.patch(`/admin/vendedores/${id}/role`, { role }).then((r) => r.data),

@@ -2,8 +2,30 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastProvider } from './contexts/ToastContext';
 import { useAuthStore } from './store/authStore';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, Component, type ReactNode, type ErrorInfo } from 'react';
 import { PageLoader } from './components/ui/Spinner';
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error: Error, info: ErrorInfo) { console.error('[ErrorBoundary]', error, info); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 text-center p-6">
+          <p className="text-wf-text-primary font-semibold">Algo deu errado ao carregar esta página.</p>
+          <button className="text-sm text-wf-red underline" onClick={() => { this.setState({ hasError: false }); window.location.reload(); }}>
+            Tentar novamente
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 import { VendedorLayout } from './components/layout/VendedorLayout';
 
 // Public pages
@@ -71,6 +93,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         <BrowserRouter>
+          <ErrorBoundary>
           <Suspense fallback={suspenseFallback}>
             <Routes>
               <Route path="/login" element={<Login />} />
@@ -111,6 +134,7 @@ export default function App() {
               <Route path="*" element={<RootRedirect />} />
             </Routes>
           </Suspense>
+          </ErrorBoundary>
         </BrowserRouter>
       </ToastProvider>
     </QueryClientProvider>

@@ -34,6 +34,7 @@ export default function VendedorDetalhe() {
   });
 
   const [reprovarOpen, setReprovarOpen] = useState(false);
+  const [bloquearOpen, setBloquearOpen] = useState(false);
   const [motivo, setMotivo] = useState('');
 
   const invalidate = () => {
@@ -54,8 +55,8 @@ export default function VendedorDetalhe() {
   });
 
   const bloquearMutation = useMutation({
-    mutationFn: () => vendedoresService.bloquear(id!),
-    onSuccess: () => { invalidate(); success('Bloqueado'); },
+    mutationFn: (m: string) => vendedoresService.bloquear(id!, m),
+    onSuccess: () => { invalidate(); success('Bloqueado'); setBloquearOpen(false); setMotivo(''); },
     onError: (err: any) => error(err?.response?.data?.message ?? 'Erro'),
   });
 
@@ -88,14 +89,14 @@ export default function VendedorDetalhe() {
         <Badge variant={currentRole === 'admin' ? 'warning' : 'default'} className="text-sm px-3 py-1">
           {ROLE_LABELS[currentRole]}
         </Badge>
-        {v.status === 'pendente' && (
-          <>
-            <Button size="sm" onClick={() => aprovarMutation.mutate()} loading={aprovarMutation.isPending}>Aprovar</Button>
-            <Button size="sm" variant="danger" onClick={() => setReprovarOpen(true)}>Reprovar</Button>
-          </>
+        {(v.status === 'pendente' || v.status === 'reprovado') && (
+          <Button size="sm" onClick={() => aprovarMutation.mutate()} loading={aprovarMutation.isPending}>Aprovar</Button>
+        )}
+        {(v.status === 'pendente' || v.status === 'aprovado') && (
+          <Button size="sm" variant="danger" onClick={() => { setMotivo(''); setReprovarOpen(true); }}>Reprovar</Button>
         )}
         {v.status === 'aprovado' && (
-          <Button size="sm" variant="danger" onClick={() => bloquearMutation.mutate()} loading={bloquearMutation.isPending}>Bloquear</Button>
+          <Button size="sm" variant="danger" onClick={() => { setMotivo(''); setBloquearOpen(true); }} loading={bloquearMutation.isPending}>Bloquear</Button>
         )}
         {v.status === 'bloqueado' && (
           <Button size="sm" onClick={() => desbloquearMutation.mutate()} loading={desbloquearMutation.isPending}>Desbloquear</Button>
@@ -226,10 +227,20 @@ export default function VendedorDetalhe() {
 
       <Modal open={reprovarOpen} onClose={() => setReprovarOpen(false)} title="Reprovar Usuário" size="sm">
         <div className="p-5 space-y-4">
-          <Input label="Motivo (opcional)" value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Ex: documentação inválida" />
+          <Input label="Motivo *" value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Ex: documentação inválida" />
           <div className="flex justify-end gap-3">
             <Button variant="ghost" onClick={() => setReprovarOpen(false)}>Cancelar</Button>
-            <Button variant="danger" loading={reprovarMutation.isPending} onClick={() => reprovarMutation.mutate(motivo)}>Reprovar</Button>
+            <Button variant="danger" loading={reprovarMutation.isPending} disabled={motivo.trim().length < 5} onClick={() => reprovarMutation.mutate(motivo)}>Reprovar</Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal open={bloquearOpen} onClose={() => setBloquearOpen(false)} title="Bloquear Usuário" size="sm">
+        <div className="p-5 space-y-4">
+          <Input label="Motivo *" value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Ex: violação dos termos de uso" />
+          <div className="flex justify-end gap-3">
+            <Button variant="ghost" onClick={() => setBloquearOpen(false)}>Cancelar</Button>
+            <Button variant="danger" loading={bloquearMutation.isPending} disabled={motivo.trim().length < 5} onClick={() => bloquearMutation.mutate(motivo)}>Bloquear</Button>
           </div>
         </div>
       </Modal>

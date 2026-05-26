@@ -57,7 +57,8 @@ export async function register(req: Request, res: Response, next: NextFunction):
 
     const vendedor = await db('vendedores').where({ cpf }).first();
 
-    await salvarNotificacao(db, vendedor.id, 'Cadastro enviado!', 'Seu cadastro foi enviado para análise. Aguarde a aprovação da World Film.');
+    salvarNotificacao(db, vendedor.id, 'Cadastro enviado!', 'Seu cadastro foi enviado para análise. Aguarde a aprovação da World Film.')
+      .catch((e) => console.error('[notificacao:register]', e));
 
     res.status(201).json({ message: 'Cadastro enviado com sucesso. Aguarde a aprovação.' });
   } catch (err) {
