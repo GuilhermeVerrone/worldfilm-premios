@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs'
 import { PageLoader } from '../components/ui/Spinner';
 import { useToast } from '../contexts/ToastContext';
 import { distribuidoresService } from '../services/distribuidores.service';
+import { vendedoresService } from '../services/vendedores.service';
 import { maskCNPJ } from '../lib/utils';
 
 const REGIOES = ['Sul', 'Sudeste', 'Nordeste', 'Norte', 'Centro-Oeste'];
@@ -23,6 +24,12 @@ export default function DistribuidorDetalhe() {
   const { data, isLoading } = useQuery({
     queryKey: ['distribuidor', id],
     queryFn: () => distribuidoresService.getById(id!),
+    enabled: !!id,
+  });
+
+  const { data: vendedoresData } = useQuery({
+    queryKey: ['distribuidorVendedores', id],
+    queryFn: () => vendedoresService.list({ distribuidor_id: id!, limit: 100 }),
     enabled: !!id,
   });
 
@@ -51,8 +58,8 @@ export default function DistribuidorDetalhe() {
 
   if (isLoading || !data) return <Layout title="Distribuidor"><PageLoader /></Layout>;
 
-  const d = data.distribuidor;
-  const vendedores = data.vendedores ?? [];
+  const d = data;
+  const vendedores = vendedoresData?.data ?? [];
 
   function startEdit() {
     setForm({ razao_social: d.razao_social, cnpj: d.cnpj, responsavel: d.responsavel, email: d.email, whatsapp: d.whatsapp, regiao: d.regiao });

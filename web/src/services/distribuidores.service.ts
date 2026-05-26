@@ -26,7 +26,7 @@ export const distribuidoresService = {
     api.get<PaginatedResponse<Distribuidor>>('/admin/distribuidores', { params }).then((r) => r.data),
 
   getById: (id: string) =>
-    api.get<{ distribuidor: Distribuidor; vendedores: any[] }>(`/admin/distribuidores/${id}`).then((r) => r.data),
+    api.get<Distribuidor & { vendedores_ativos: number }>(`/admin/distribuidores/${id}`).then((r) => r.data),
 
   create: (data: Partial<Distribuidor>) =>
     api.post<{ distribuidor: Distribuidor }>('/admin/distribuidores', data).then((r) => r.data),
