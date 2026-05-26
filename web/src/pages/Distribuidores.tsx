@@ -78,7 +78,7 @@ export default function Distribuidores() {
               <tbody className="divide-y divide-wf-border">
                 {data?.data.map((d) => (
                   <tr key={d.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 text-wf-text-primary font-medium">{d.nome}</td>
+                    <td className="px-4 py-3 text-wf-text-primary font-medium">{d.razao_social}</td>
                     <td className="px-4 py-3 text-wf-text-secondary font-mono text-xs">{maskCNPJ(d.cnpj)}</td>
                     <td className="px-4 py-3 text-wf-text-secondary">{d.regiao}</td>
                     <td className="px-4 py-3 text-center text-wf-text-secondary">{d.vendedores_ativos ?? 0}</td>
@@ -108,14 +108,15 @@ export default function Distribuidores() {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Novo Distribuidor" size="md">
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <Input label="Nome *" value={form.nome ?? ''} onChange={(e) => setForm((f) => ({ ...f, nome: e.target.value }))} required />
+          <Input label="Razão Social *" value={form.razao_social ?? ''} onChange={(e) => setForm((f) => ({ ...f, razao_social: e.target.value }))} required />
           <Input label="CNPJ *" placeholder="00.000.000/0000-00" inputMode="numeric" value={form.cnpj ?? ''} onChange={(e) => setForm((f) => ({ ...f, cnpj: maskCNPJ(e.target.value) }))} required />
+          <Input label="Responsável *" value={form.responsavel ?? ''} onChange={(e) => setForm((f) => ({ ...f, responsavel: e.target.value }))} required />
+          <Input label="E-mail *" type="email" value={form.email ?? ''} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} required />
+          <Input label="WhatsApp *" placeholder="(00) 00000-0000" value={form.whatsapp ?? ''} onChange={(e) => setForm((f) => ({ ...f, whatsapp: e.target.value }))} required />
           <Select label="Região *" value={form.regiao ?? ''} onChange={(e) => setForm((f) => ({ ...f, regiao: e.target.value }))} required>
             <option value="">Selecione...</option>
             {REGIOES.map((r) => <option key={r} value={r}>{r}</option>)}
           </Select>
-          <Input label="E-mail" type="email" value={form.email ?? ''} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
-          <Input label="Telefone" value={form.telefone ?? ''} onChange={(e) => setForm((f) => ({ ...f, telefone: e.target.value }))} />
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="ghost" type="button" onClick={() => setModalOpen(false)}>Cancelar</Button>
             <Button type="submit" loading={createMutation.isPending}>Criar</Button>

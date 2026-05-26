@@ -2,12 +2,13 @@ import api from './api';
 
 export interface Distribuidor {
   id: string;
-  nome: string;
+  razao_social: string;
   cnpj: string;
+  responsavel: string;
+  email: string;
+  whatsapp: string;
   regiao: string;
   status: string;
-  email: string | null;
-  telefone: string | null;
   created_at: string;
   vendedores_ativos?: number;
 }

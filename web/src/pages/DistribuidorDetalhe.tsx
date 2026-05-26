@@ -55,7 +55,7 @@ export default function DistribuidorDetalhe() {
   const vendedores = data.vendedores ?? [];
 
   function startEdit() {
-    setForm({ nome: d.nome, cnpj: d.cnpj, regiao: d.regiao, email: d.email ?? '', telefone: d.telefone ?? '' });
+    setForm({ razao_social: d.razao_social, cnpj: d.cnpj, responsavel: d.responsavel, email: d.email, whatsapp: d.whatsapp, regiao: d.regiao });
     setEditMode(true);
   }
 
@@ -66,8 +66,8 @@ export default function DistribuidorDetalhe() {
 
   return (
     <Layout
-      title={d.nome}
-      breadcrumbs={[{ label: 'Distribuidores', to: '/distribuidores' }, { label: d.nome }]}
+      title={d.razao_social}
+      breadcrumbs={[{ label: 'Distribuidores', to: '/distribuidores' }, { label: d.razao_social }]}
     >
       <Tabs defaultValue="info">
         <TabsList>
@@ -80,14 +80,15 @@ export default function DistribuidorDetalhe() {
           <Card>
             {editMode ? (
               <form onSubmit={handleSave} className="space-y-4">
-                <Input label="Nome *" value={form.nome} onChange={(e) => setForm((f: any) => ({ ...f, nome: e.target.value }))} required />
+                <Input label="Razão Social *" value={form.razao_social} onChange={(e) => setForm((f: any) => ({ ...f, razao_social: e.target.value }))} required />
                 <Input label="CNPJ *" placeholder="00.000.000/0000-00" inputMode="numeric" value={form.cnpj} onChange={(e) => setForm((f: any) => ({ ...f, cnpj: maskCNPJ(e.target.value) }))} required />
+                <Input label="Responsável *" value={form.responsavel} onChange={(e) => setForm((f: any) => ({ ...f, responsavel: e.target.value }))} required />
+                <Input label="E-mail *" type="email" value={form.email} onChange={(e) => setForm((f: any) => ({ ...f, email: e.target.value }))} required />
+                <Input label="WhatsApp *" placeholder="(00) 00000-0000" value={form.whatsapp} onChange={(e) => setForm((f: any) => ({ ...f, whatsapp: e.target.value }))} required />
                 <Select label="Região *" value={form.regiao} onChange={(e) => setForm((f: any) => ({ ...f, regiao: e.target.value }))} required>
                   <option value="">Selecione...</option>
                   {REGIOES.map((r) => <option key={r} value={r}>{r}</option>)}
                 </Select>
-                <Input label="E-mail" type="email" value={form.email} onChange={(e) => setForm((f: any) => ({ ...f, email: e.target.value }))} />
-                <Input label="Telefone" value={form.telefone} onChange={(e) => setForm((f: any) => ({ ...f, telefone: e.target.value }))} />
                 <div className="flex gap-3">
                   <Button type="submit" loading={updateMutation.isPending}>Salvar</Button>
                   <Button variant="ghost" type="button" onClick={() => setEditMode(false)}>Cancelar</Button>
@@ -97,7 +98,7 @@ export default function DistribuidorDetalhe() {
               <div className="space-y-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-wf-text-primary">{d.nome}</h2>
+                    <h2 className="text-xl font-bold text-wf-text-primary">{d.razao_social}</h2>
                     <p className="text-wf-text-secondary text-sm mt-1">{d.regiao}</p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -107,8 +108,9 @@ export default function DistribuidorDetalhe() {
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm pt-2 border-t border-wf-border">
                   <div><span className="text-wf-text-muted">CNPJ:</span> <span className="text-wf-text-primary ml-2 font-mono">{maskCNPJ(d.cnpj)}</span></div>
-                  <div><span className="text-wf-text-muted">E-mail:</span> <span className="text-wf-text-primary ml-2">{d.email ?? '—'}</span></div>
-                  <div><span className="text-wf-text-muted">Telefone:</span> <span className="text-wf-text-primary ml-2">{d.telefone ?? '—'}</span></div>
+                  <div><span className="text-wf-text-muted">Responsável:</span> <span className="text-wf-text-primary ml-2">{d.responsavel}</span></div>
+                  <div><span className="text-wf-text-muted">E-mail:</span> <span className="text-wf-text-primary ml-2">{d.email}</span></div>
+                  <div><span className="text-wf-text-muted">WhatsApp:</span> <span className="text-wf-text-primary ml-2">{d.whatsapp}</span></div>
                   <div><span className="text-wf-text-muted">Cadastro:</span> <span className="text-wf-text-primary ml-2">{new Date(d.created_at).toLocaleDateString('pt-BR')}</span></div>
                 </div>
               </div>
