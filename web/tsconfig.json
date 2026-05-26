@@ -6,6 +6,11 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@worldfilm/shared": ["../shared/src/index.ts"],
+      "@worldfilm/shared/*": ["../shared/src/*"]
+    },
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
