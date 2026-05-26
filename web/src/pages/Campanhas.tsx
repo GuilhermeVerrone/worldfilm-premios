@@ -69,7 +69,8 @@ export default function Campanhas() {
   function handleCreate() {
     const payload = {
       ...form,
-      segmentacao: JSON.stringify(form.segmentacao),
+      data_inicio: new Date(form.data_inicio).toISOString(),
+      data_fim: new Date(form.data_fim).toISOString(),
     };
     createMutation.mutate(payload);
   }
@@ -132,13 +133,19 @@ export default function Campanhas() {
           {wizardStep === 1 && (
             <div className="space-y-4">
               <Input label="Nome da Campanha *" value={form.nome ?? ''} onChange={(e) => setForm((f: any) => ({ ...f, nome: e.target.value }))} required />
+              <Select label="Tipo *" value={form.tipo ?? ''} onChange={(e) => setForm((f: any) => ({ ...f, tipo: e.target.value }))} required>
+                <option value="">Selecione...</option>
+                <option value="lancamento">Lançamento</option>
+                <option value="vendas">Vendas</option>
+                <option value="especial">Especial</option>
+              </Select>
               <Textarea label="Descrição" rows={3} value={form.descricao ?? ''} onChange={(e) => setForm((f: any) => ({ ...f, descricao: e.target.value }))} />
               <div className="grid grid-cols-2 gap-4">
                 <Input label="Data Início *" type="date" value={form.data_inicio ?? ''} onChange={(e) => setForm((f: any) => ({ ...f, data_inicio: e.target.value }))} required />
                 <Input label="Data Fim *" type="date" value={form.data_fim ?? ''} onChange={(e) => setForm((f: any) => ({ ...f, data_fim: e.target.value }))} required />
               </div>
               <div className="flex justify-end">
-                <Button onClick={() => setWizardStep(2)} disabled={!form.nome || !form.data_inicio || !form.data_fim}>
+                <Button onClick={() => setWizardStep(2)} disabled={!form.nome || !form.tipo || !form.data_inicio || !form.data_fim}>
                   Próximo →
                 </Button>
               </div>
