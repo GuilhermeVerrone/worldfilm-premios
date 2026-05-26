@@ -11,6 +11,11 @@ export function validateEnv(): void {
   if (missing.length > 0) {
     throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
   }
+
+  const databaseUrl = process.env.DATABASE_URL ?? '';
+  if (!/^postgres(ql)?:\/\//i.test(databaseUrl)) {
+    throw new Error('Invalid DATABASE_URL: expected postgres:// or postgresql:// (Neon/PostgreSQL).');
+  }
 }
 
 export const env = {

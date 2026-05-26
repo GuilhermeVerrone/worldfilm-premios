@@ -3,10 +3,38 @@ import path from 'path';
 import dotenv from 'dotenv';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+function ensurePostgresUrl(url: string | undefined): string {
+  if (!url) {
+    throw new Error('[database] Missing DATABASE_URL for Knex configuration.');
+  }
+
+  if (!/^postgres(ql)?:\/\//i.test(url)) {
+    throw new Error('[database] DATABASE_URL must use the PostgreSQL protocol (postgres:// or postgresql://).');
+  }
+
+  return url;
+}
+
+function buildConnection(url: string): Knex.StaticConnectionConfig {
+  const requiresSsl = /neon\.tech/i.test(url) || /[?&]sslmode=/i.test(url);
+
+  if (!requiresSsl) {
+    return url;
+  }
+
+  return {
+    connectionString: url,
+    ssl: { rejectUnauthorized: false },
+  };
+}
+
+const databaseUrl = ensurePostgresUrl(process.env.DATABASE_URL);
+const connection = buildConnection(databaseUrl);
+
 const config: Record<string, Knex.Config> = {
   development: {
     client: 'pg',
-    connection: process.env.DATABASE_URL,
+    connection,
     migrations: {
       directory: './migrations',
       extension: 'ts',
@@ -20,7 +48,7 @@ const config: Record<string, Knex.Config> = {
 
   staging: {
     client: 'pg',
-    connection: process.env.DATABASE_URL,
+    connection,
     migrations: {
       directory: './migrations',
       extension: 'js',
@@ -34,10 +62,7 @@ const config: Record<string, Knex.Config> = {
 
   production: {
     client: 'pg',
-    connection: {
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
-    },
+    connection,
     migrations: {
       directory: './migrations',
       extension: 'js',
