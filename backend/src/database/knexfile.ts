@@ -15,7 +15,7 @@ function ensurePostgresUrl(url: string | undefined): string {
   return url;
 }
 
-function buildConnection(url: string): Knex.StaticConnectionConfig {
+function buildConnection(url: string): Knex.Config['connection'] {
   const requiresSsl = /neon\.tech/i.test(url) || /[?&]sslmode=/i.test(url);
 
   if (!requiresSsl) {
